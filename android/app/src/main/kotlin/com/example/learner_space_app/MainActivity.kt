@@ -1,4 +1,4 @@
-package com.example.learner_space_app
+package com.learnerspace.learnerspace
 
 import io.flutter.embedding.android.FlutterActivity
 

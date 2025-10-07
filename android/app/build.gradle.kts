@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.learner_space_app"
+    namespace = "com.learnerspace.learnerspace"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.learner_space_app"
+        applicationId = "com.learnerspace.learnerspace"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
