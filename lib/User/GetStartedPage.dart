@@ -36,8 +36,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Navigate to your main page or dashboard
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -52,33 +51,83 @@ class _GetStartedPageState extends State<GetStartedPage> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                children: const [
+                children: [
                   OnboardingStep(
                     titlePart1: "Learner's ",
                     titlePart2: "Space",
                     imagePath: "assets/User/Step_1.png",
-                    subtitle:
-                        "Welcome to Learner’s Space\nSimplify Your Learning Journey",
+                    midTitle: [
+                      TextSpan(
+                        text: "Welcome To ",
+                        style: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: "Learners Space\nSimplify Your Learning",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ],
+                    subtitle: "Boost Your Productivity With Learner Space",
                   ),
                   OnboardingStep(
-                    titlePart1: "Discover ",
-                    titlePart2: "Courses",
+                    titlePart1: "Learner's ",
+                    titlePart2: "Space",
                     imagePath: "assets/User/Step_2.png",
+                    midTitle: [
+                      TextSpan(
+                        text: "Learn Effortlessly ",
+                        style: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: "With Learner's Space",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ],
                     subtitle:
-                        "Find curated courses that match\nyour personal learning path",
+                        "Find Curated Courses That Match\nYour Personal Learning Path",
                   ),
                   OnboardingStep(
-                    titlePart1: "Track ",
-                    titlePart2: "Progress",
+                    titlePart1: "Learner's ",
+                    titlePart2: "Space",
                     imagePath: "assets/User/Step_3.png",
-                    subtitle:
-                        "Monitor your growth and reach\nyour learning goals faster",
+                    midTitle: [
+                      TextSpan(
+                        text: "Stay Focused, ",
+                        style: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: "Be Productive",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ],
+                    subtitle: "Stay On Top With Learner's Space",
                   ),
                 ],
               ),
             ),
-
-            // --- Page indicator ---
             SmoothPageIndicator(
               controller: _pageController,
               count: 3,
@@ -123,11 +172,11 @@ class _GetStartedPageState extends State<GetStartedPage> {
   }
 }
 
-// --- Custom reusable widget for each onboarding step ---
 class OnboardingStep extends StatelessWidget {
   final String titlePart1;
   final String titlePart2;
   final String imagePath;
+  final List<TextSpan> midTitle;
   final String subtitle;
 
   const OnboardingStep({
@@ -135,6 +184,7 @@ class OnboardingStep extends StatelessWidget {
     required this.titlePart1,
     required this.titlePart2,
     required this.imagePath,
+    required this.midTitle,
     required this.subtitle,
   });
 
@@ -146,7 +196,7 @@ class OnboardingStep extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Title
+            // Main title
             Text.rich(
               TextSpan(
                 style: const TextStyle(
@@ -169,16 +219,21 @@ class OnboardingStep extends StatelessWidget {
 
             // Image
             Padding(
-              padding: const EdgeInsets.only(top: 80.0, bottom: 40),
+              padding: const EdgeInsets.only(top: 80.0, bottom: 30),
               child: Image.asset(imagePath, height: 250),
             ),
 
-            // Subtitle
+            Text.rich(
+              TextSpan(children: midTitle),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 10),
             Text(
               subtitle,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
               ),

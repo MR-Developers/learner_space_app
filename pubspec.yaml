@@ -58,6 +58,17 @@ flutter:
   uses-material-design: true
   assets:
     - assets/User/
+    - assets/Fonts/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/Fonts/Poppins-Regular.ttf
+        - asset: assets/Fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/Fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/Fonts/Poppins-Black.ttf
+          weight: 900
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
