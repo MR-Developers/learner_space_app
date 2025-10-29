@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:learner_space_app/State/auth_provider.dart';
 
 class UserLogin extends StatefulWidget {
   const UserLogin({super.key});
@@ -13,29 +15,44 @@ class _UserLoginState extends State<UserLogin> {
   final TextEditingController passwordController = TextEditingController();
 
   @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
+    // Get provider & loading state
+    final authProvider = context.watch<AuthProvider>();
+    final isLoading = authProvider.isLoading;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: SizedBox(
           height: size.height,
           child: Stack(
             children: [
+              // Background color layers
               Column(
                 children: [
                   Container(height: size.height * 0.5, color: Colors.orange),
                   Container(height: size.height * 0.5, color: Colors.white),
                 ],
               ),
+
+              // Login card
               Align(
                 alignment: Alignment.center,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    const Text(
                       "Sign In To Your\nAccount",
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: 32,
@@ -66,7 +83,9 @@ class _UserLoginState extends State<UserLogin> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            Align(
+
+                            // Email
+                            const Align(
                               alignment: Alignment.centerLeft,
                               child: Text("Email"),
                             ),
@@ -78,7 +97,9 @@ class _UserLoginState extends State<UserLogin> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            Align(
+
+                            // Password
+                            const Align(
                               alignment: Alignment.centerLeft,
                               child: Text("Password"),
                             ),
@@ -103,6 +124,7 @@ class _UserLoginState extends State<UserLogin> {
                               ),
                             ),
                             const SizedBox(height: 10),
+
                             Align(
                               alignment: Alignment.centerRight,
                               child: Text(
@@ -113,17 +135,20 @@ class _UserLoginState extends State<UserLogin> {
                                 ),
                               ),
                             ),
+
                             const SizedBox(height: 24),
+
+                            // Signup link
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  "Don't Have An Account?",
-                                  style: TextStyle(fontFamily: 'Poppins'),
-                                ),
-                                Padding(
-                                  padding: EdgeInsetsGeometry.only(left: 8),
-                                  child: Text(
+                                const Text("Don't Have An Account?"),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, "/signup");
+                                  },
+                                  child: const Text(
                                     "Sign Up",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -133,50 +158,80 @@ class _UserLoginState extends State<UserLogin> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
-                            Align(
-                              alignment: Alignment.center,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    "/home",
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
 
-                                  width: double.infinity,
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(14.0),
-                                      child: Text(
-                                        "Login",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
+                            const SizedBox(height: 24),
+
+                            // Login button
+                            GestureDetector(
+                              onTap: isLoading
+                                  ? null
+                                  : () async {
+                                      final email = emailController.text.trim();
+                                      final password = passwordController.text
+                                          .trim();
+
+                                      if (email.isEmpty || password.isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Please fill all fields.",
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      await authProvider.login(
+                                        context,
+                                        email,
+                                        password,
+                                      );
+                                    },
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                child: Center(
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Text(
+                                          "Login",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
                                 ),
                               ),
                             ),
+
                             const SizedBox(height: 24),
+
+                            // Divider
                             Row(
                               children: [
-                                Expanded(
-                                  child: Divider(
-                                    color: Colors.grey,
-                                    thickness: 1,
-                                  ),
+                                const Expanded(
+                                  child: Divider(color: Colors.grey),
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                  ),
                                   child: Text(
                                     'Or',
                                     style: TextStyle(
@@ -185,15 +240,15 @@ class _UserLoginState extends State<UserLogin> {
                                     ),
                                   ),
                                 ),
-                                Expanded(
-                                  child: Divider(
-                                    color: Colors.grey,
-                                    thickness: 1,
-                                  ),
+                                const Expanded(
+                                  child: Divider(color: Colors.grey),
                                 ),
                               ],
                             ),
+
                             const SizedBox(height: 24),
+
+                            // Google button
                             Container(
                               height: 50,
                               decoration: BoxDecoration(
@@ -220,7 +275,7 @@ class _UserLoginState extends State<UserLogin> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.black,
-                                      fontWeight: FontWeight.w100,
+                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
                                 ],
