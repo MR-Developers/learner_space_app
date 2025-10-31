@@ -1,4 +1,4 @@
 class ApiEndpoints {
-  static const String login = '/instructors/login';
-  static const String register = '/instructors';
+  static const String login = '/users/login';
+  static const String register = '/users';
 }
