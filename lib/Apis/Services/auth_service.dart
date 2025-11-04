@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:learner_space_app/Data/Models/UserModel.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/network/api_endpoints.dart';
 
@@ -14,6 +15,23 @@ class AuthService {
       return response.data;
     } on DioException catch (e) {
       final message = e.response?.data?['message'] ?? 'Login failed';
+      throw Exception(message);
+    }
+  }
+
+  Future<Map<String, dynamic>> signup(UserSignUpFormValues form) async {
+    try {
+      final data = form.toJson();
+
+      final response = await _dio.post(
+        ApiEndpoints.register,
+        data: data,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] ?? "SignUp Failed";
       throw Exception(message);
     }
   }

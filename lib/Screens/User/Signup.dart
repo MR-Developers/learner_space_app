@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Data/Models/UserModel.dart';
+import 'package:provider/provider.dart';
+import 'package:learner_space_app/State/auth_provider.dart';
 
 class UserSignup extends StatefulWidget {
   const UserSignup({super.key});
@@ -19,8 +22,22 @@ class _UserSignupState extends State<UserSignup> {
       TextEditingController();
 
   @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    dob.dispose();
+    phoneNumber.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    reenterPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final authProvider = context.watch<AuthProvider>();
+    final isLoading = authProvider.isLoading;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -28,12 +45,15 @@ class _UserSignupState extends State<UserSignup> {
           height: size.height,
           child: Stack(
             children: [
+              // background gradient
               Column(
                 children: [
                   Container(height: size.height * 0.5, color: Colors.orange),
                   Container(height: size.height * 0.5, color: Colors.white),
                 ],
               ),
+
+              // signup card
               Align(
                 alignment: Alignment.center,
                 child: Column(
@@ -74,6 +94,8 @@ class _UserSignupState extends State<UserSignup> {
                               ),
                             ),
                             const SizedBox(height: 16),
+
+                            // First and last name
                             Row(
                               children: [
                                 Expanded(
@@ -115,6 +137,7 @@ class _UserSignupState extends State<UserSignup> {
                             ),
 
                             const SizedBox(height: 16),
+
                             const Text("Email"),
                             const SizedBox(height: 5),
                             TextField(
@@ -127,6 +150,7 @@ class _UserSignupState extends State<UserSignup> {
                             ),
 
                             const SizedBox(height: 16),
+
                             const Text("Password"),
                             const SizedBox(height: 5),
                             TextField(
@@ -151,6 +175,7 @@ class _UserSignupState extends State<UserSignup> {
                             ),
 
                             const SizedBox(height: 16),
+
                             const Text("Re-enter Password"),
                             const SizedBox(height: 5),
                             TextField(
@@ -164,39 +189,92 @@ class _UserSignupState extends State<UserSignup> {
 
                             const SizedBox(height: 24),
 
-                            /// Sign Up Button
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
+                            // 🔸 Sign Up Button
+                            GestureDetector(
+                              onTap: isLoading
+                                  ? null
+                                  : () async {
+                                      final firstName = firstNameController.text
+                                          .trim();
+                                      final lastName = lastNameController.text
+                                          .trim();
+                                      final email = emailController.text.trim();
+                                      final password = passwordController.text
+                                          .trim();
+                                      final confirmPassword =
+                                          reenterPasswordController.text.trim();
+
+                                      if (firstName.isEmpty ||
+                                          lastName.isEmpty ||
+                                          email.isEmpty ||
+                                          password.isEmpty ||
+                                          confirmPassword.isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Please fill all fields.",
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      // final user = UserSignUpFormValues(
+                                      //   name: "$firstName $lastName",
+                                      //   email: email,
+                                      //   password: password,
+                                      //   confirmPassword: password,
+                                      // );
+                                      if (password != confirmPassword) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Passwords do not match.",
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      // await authProvider.signup(context, user);
+                                    },
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    "/home",
-                                  );
-                                },
-                                child: const Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                child: Center(
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Text(
+                                          "Sign Up",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ),
 
                             const SizedBox(height: 24),
 
-                            /// Divider
+                            // Divider
                             Row(
                               children: const [
                                 Expanded(child: Divider(color: Colors.grey)),
@@ -216,7 +294,7 @@ class _UserSignupState extends State<UserSignup> {
 
                             const SizedBox(height: 24),
 
-                            /// Google button
+                            // Google button
                             Container(
                               height: 50,
                               decoration: BoxDecoration(
@@ -249,7 +327,7 @@ class _UserSignupState extends State<UserSignup> {
 
                             const SizedBox(height: 20),
 
-                            /// Already have account
+                            // Already have account
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Repository/auth_repository.dart';
+import 'package:learner_space_app/Data/Models/UserModel.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _repo = AuthRepository();
@@ -20,6 +21,26 @@ class AuthProvider extends ChangeNotifier {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signup(BuildContext context, UserSignUpFormValues data) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _repo.signup(data);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account Created Successfully')),
+      );
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       ScaffoldMessenger.of(
