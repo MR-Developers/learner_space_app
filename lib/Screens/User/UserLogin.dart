@@ -146,7 +146,7 @@ class _UserLoginState extends State<UserLogin> {
                                 const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    Navigator.pushNamed(context, "/signup");
+                                    Navigator.pushNamed(context, "/signUp");
                                   },
                                   child: const Text(
                                     "Sign Up",

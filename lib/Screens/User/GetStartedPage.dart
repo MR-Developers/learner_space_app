@@ -53,7 +53,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                 controller: _pageController,
                 children: [
                   OnboardingStep(
-                    titlePart1: "Learner's ",
+                    titlePart1: "Learner ",
                     titlePart2: "Space",
                     imagePath: "assets/User/Step_1.png",
                     midTitle: [
@@ -66,7 +66,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         ),
                       ),
                       const TextSpan(
-                        text: "Learners Space\nSimplify Your Learning",
+                        text: "Learner Space\nSimplify Your Learning",
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -77,7 +77,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                     subtitle: "Boost Your Productivity With Learner Space",
                   ),
                   OnboardingStep(
-                    titlePart1: "Learner's ",
+                    titlePart1: "Learner ",
                     titlePart2: "Space",
                     imagePath: "assets/User/Step_2.png",
                     midTitle: [
@@ -90,7 +90,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         ),
                       ),
                       const TextSpan(
-                        text: "With Learner's Space",
+                        text: "With Learner Space",
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         "Find Curated Courses That Match\nYour Personal Learning Path",
                   ),
                   OnboardingStep(
-                    titlePart1: "Learner's ",
+                    titlePart1: "Learner ",
                     titlePart2: "Space",
                     imagePath: "assets/User/Step_3.png",
                     midTitle: [
@@ -123,7 +123,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         ),
                       ),
                     ],
-                    subtitle: "Stay On Top With Learner's Space",
+                    subtitle: "Stay On Top With Learner Space",
                   ),
                 ],
               ),
