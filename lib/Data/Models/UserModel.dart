@@ -1,5 +1,7 @@
 class UserSignUpFormValues {
-  final String name;
+  final String firstName;
+  final String middleName;
+  final String lastName;
   final String email;
   final String password;
   final String confirmPassword;
@@ -7,7 +9,9 @@ class UserSignUpFormValues {
   final int number;
 
   UserSignUpFormValues({
-    required this.name,
+    required this.firstName,
+    required this.middleName,
+    required this.lastName,
     required this.email,
     required this.password,
     required this.confirmPassword,
@@ -16,13 +20,10 @@ class UserSignUpFormValues {
   });
 
   factory UserSignUpFormValues.fromJson(Map<String, dynamic> json) {
-    final knownKeys = {'name', 'email', 'password', 'confirmPassword'};
-
-    final extra = Map<String, dynamic>.from(json)
-      ..removeWhere((key, _) => knownKeys.contains(key));
-
     return UserSignUpFormValues(
-      name: json['name'] ?? '',
+      firstName: json['name']['first'] ?? '',
+      middleName: json['name']['middle'] ?? '',
+      lastName: json['name']['last'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? '',
       confirmPassword: json['confirmPassword'] ?? '',
@@ -35,8 +36,9 @@ class UserSignUpFormValues {
   Map<String, dynamic> toJson() {
     final data = {
       'name': {
-        'first': name.split(' ').first,
-        'last': name.split(' ').length > 1 ? name.split(' ').last : '',
+        'firstname': firstName,
+        'middlename': middleName,
+        'lastname': lastName,
       },
       'email': email,
       'password': password,
