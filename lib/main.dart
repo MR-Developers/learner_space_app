@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Screens/User/SplashScreen.dart';
+import 'package:learner_space_app/Screens/User/UserSkeleton.dart';
 import 'package:provider/provider.dart';
 
 //#region Screens
@@ -63,7 +64,10 @@ class MyApp extends StatelessWidget {
           "/getStarted": (context) => const GetStartedPage(),
           "/login": (context) => const UserLogin(),
           "/signUp": (context) => const UserSignup(),
-          "/home": (context) => const UserHome(),
+          "/home": (context) => const UserSkeleton(initialIndex: 0),
+          "/courses": (context) => const UserSkeleton(initialIndex: 1),
+          "/aichat": (context) => const UserSkeleton(initialIndex: 2),
+          "/profile": (context) => const UserSkeleton(initialIndex: 3),
         },
         //#endregion
       ),

@@ -66,31 +66,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         ),
                       ),
                       const TextSpan(
-                        text: "Learner Space\nSimplify Your Learning",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                      ),
-                    ],
-                    subtitle: "Boost Your Productivity With Learner Space",
-                  ),
-                  OnboardingStep(
-                    titlePart1: "Learner ",
-                    titlePart2: "Space",
-                    imagePath: "assets/User/Step_2.png",
-                    midTitle: [
-                      TextSpan(
-                        text: "Learn Effortlessly ",
-                        style: TextStyle(
-                          color: Colors.orange.shade700,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                      ),
-                      const TextSpan(
-                        text: "With Learner Space",
+                        text: "Discover Verified Courses",
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -99,15 +75,15 @@ class _GetStartedPageState extends State<GetStartedPage> {
                       ),
                     ],
                     subtitle:
-                        "Find Curated Courses That Match\nYour Personal Learning Path",
+                        "Browse 1000+ courses from trusted EdTech startups with transparent outcomes",
                   ),
                   OnboardingStep(
                     titlePart1: "Learner ",
                     titlePart2: "Space",
-                    imagePath: "assets/User/Step_3.png",
+                    imagePath: "assets/User/Step_2.png",
                     midTitle: [
                       TextSpan(
-                        text: "Stay Focused, ",
+                        text: "Real Reviews",
                         style: TextStyle(
                           color: Colors.orange.shade700,
                           fontWeight: FontWeight.bold,
@@ -115,7 +91,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         ),
                       ),
                       const TextSpan(
-                        text: "Be Productive",
+                        text: ", Real Results",
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -123,7 +99,33 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         ),
                       ),
                     ],
-                    subtitle: "Stay On Top With Learner Space",
+                    subtitle:
+                        "Read authentic reviews from verified learners who've completed the programs",
+                  ),
+                  OnboardingStep(
+                    titlePart1: "Learner ",
+                    titlePart2: "Space",
+                    imagePath: "assets/User/Step_3.png",
+                    midTitle: [
+                      TextSpan(
+                        text: "Track Your",
+                        style: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: " Success",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ],
+                    subtitle:
+                        "See real placement data, salary outcomes, and career transitions",
                   ),
                 ],
               ),
@@ -232,11 +234,7 @@ class OnboardingStep extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
+              style: const TextStyle(fontSize: 18, color: Colors.black),
             ),
           ],
         ),

@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(
-    const MaterialApp(debugShowCheckedModeBanner: false, home: UserHome()),
-  );
-}
-
 class UserHome extends StatelessWidget {
   const UserHome({super.key});
 
@@ -38,45 +32,32 @@ class UserHome extends StatelessWidget {
       },
     ];
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: _buildBottomNavBar(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          // ✅ Prevent overflow by adding bottom padding dynamically
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 10,
-            bottom: MediaQuery.of(context).padding.bottom + 100,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 20),
-              _buildSearchBar(),
-              const SizedBox(height: 20),
-              _buildUiClassCard(),
-              const SizedBox(height: 25),
-              _buildSectionHeader("Featured Courses"),
-              const SizedBox(height: 12),
-              _buildCourseFilters(),
-              const SizedBox(height: 20),
-              _buildCourseList(courses),
-              const SizedBox(height: 30),
-              _buildSectionHeader("3D Design"),
-              const SizedBox(height: 12),
-              _buildCourseList(courses),
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 20),
+          _buildSearchBar(),
+          const SizedBox(height: 20),
+          _buildUiClassCard(),
+          const SizedBox(height: 25),
+          _buildSectionHeader("Featured Courses"),
+          const SizedBox(height: 12),
+          _buildCourseFilters(),
+          const SizedBox(height: 20),
+          _buildCourseList(courses),
+          const SizedBox(height: 30),
+          _buildSectionHeader("3D Design"),
+          const SizedBox(height: 12),
+          _buildCourseList(courses),
+          const SizedBox(height: 30),
+        ],
       ),
     );
   }
 
-  // -------------------- Header --------------------
   Widget _buildHeader() {
     return Row(
       children: [
@@ -107,7 +88,6 @@ class UserHome extends StatelessWidget {
     );
   }
 
-  // -------------------- Search Bar --------------------
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -125,7 +105,6 @@ class UserHome extends StatelessWidget {
     );
   }
 
-  // -------------------- UI Class Card --------------------
   Widget _buildUiClassCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -216,7 +195,6 @@ class UserHome extends StatelessWidget {
     );
   }
 
-  // -------------------- Section Header --------------------
   Widget _buildSectionHeader(String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -233,7 +211,6 @@ class UserHome extends StatelessWidget {
     );
   }
 
-  // -------------------- Course Filter Buttons --------------------
   Widget _buildCourseFilters() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -265,7 +242,6 @@ class UserHome extends StatelessWidget {
     );
   }
 
-  // -------------------- Course List --------------------
   Widget _buildCourseList(List<Map<String, dynamic>> courses) {
     return SizedBox(
       height: 240,
@@ -350,73 +326,6 @@ class UserHome extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-
-  // -------------------- Bottom Navigation Bar --------------------
-  Widget _buildBottomNavBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const [
-          _BottomNavItem(icon: Icons.home, label: "Home", active: true),
-          _BottomNavItem(icon: Icons.play_circle, label: ""),
-          _BottomNavItem(icon: Icons.ac_unit_outlined, label: ""),
-          _BottomNavItem(icon: Icons.person_outline, label: ""),
-        ],
-      ),
-    );
-  }
-}
-
-// -------------------- Bottom Nav Item --------------------
-class _BottomNavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    this.active = false,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: active ? Colors.orange : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: active ? Colors.white : Colors.grey.shade600,
-            size: 24,
-          ),
-        ),
-        if (label.isNotEmpty)
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-      ],
     );
   }
 }
