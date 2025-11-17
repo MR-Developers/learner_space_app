@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -9,24 +10,27 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfileState extends State<UserProfile> {
   // Example of dynamic state (you can modify these later)
-  String userName = "Dheeraj Reddy";
-  String userEmail = "xxxxxxxxxx@gmail.com";
+  String userName = "Budda Manikanta Saaketh";
+  String userEmail = "Buddamanikantasaaketh@gmail.com";
   String userImage =
       'https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg';
+
+  final storage = FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF57C00),
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(context),
-            const SizedBox(height: 20),
-            _buildProfileSection(),
-            const SizedBox(height: 30),
-            Expanded(
-              child: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildAppBar(context),
+              const SizedBox(height: 20),
+              _buildProfileSection(),
+              const SizedBox(height: 30),
+              Container(
+                width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.only(
@@ -38,8 +42,8 @@ class _UserProfileState extends State<UserProfile> {
                   children: [const SizedBox(height: 20), _buildMenuList()],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -58,14 +62,6 @@ class _UserProfileState extends State<UserProfile> {
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.w600,
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_none,
-              color: Colors.white,
-              size: 28,
             ),
           ),
         ],
@@ -171,18 +167,28 @@ class _UserProfileState extends State<UserProfile> {
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
-            icon: Icons.link,
-            iconColor: const Color(0xFFF57C00),
-            title: "Linked Accounts",
-            onTap: () {},
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
             icon: Icons.info_outline,
             iconColor: const Color(0xFFF57C00),
             title: "About Us",
             onTap: () {},
           ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.logout,
+            iconColor: Colors.white,
+            title: "Logout",
+            bgColor: Colors.red,
+            arrowColor: Colors.red,
+            onTap: () async {
+              await storage.deleteAll(); // clears token, user info
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                "/login",
+                (route) => false,
+              );
+            },
+          ),
+          const SizedBox(height: 12),
         ],
       ),
     );
@@ -194,6 +200,8 @@ class _UserProfileState extends State<UserProfile> {
     required Color iconColor,
     required String title,
     required VoidCallback onTap,
+    Color? bgColor,
+    Color? arrowColor,
   }) {
     return InkWell(
       onTap: onTap,
@@ -209,7 +217,7 @@ class _UserProfileState extends State<UserProfile> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF3E0),
+                color: bgColor ?? const Color(0xFFFFF3E0),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: iconColor, size: 24),
@@ -225,7 +233,11 @@ class _UserProfileState extends State<UserProfile> {
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Color(0xFFF57C00), size: 28),
+            Icon(
+              Icons.chevron_right,
+              color: arrowColor ?? Color(0xFFF57C00),
+              size: 28,
+            ),
           ],
         ),
       ),

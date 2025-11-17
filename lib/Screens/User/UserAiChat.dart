@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 void main() {
   runApp(
@@ -16,56 +17,120 @@ class UserAiChat extends StatefulWidget {
 class _UserAiChatState extends State<UserAiChat> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [
-    ChatMessage(
-      text: "Hello! I'm your AI learning assistant. How can I help you today?",
-      isUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-    ChatMessage(
-      text: "Hi! Can you explain the basics of Flutter widgets?",
-      isUser: true,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 4)),
-    ),
-    ChatMessage(
-      text:
-          "Of course! Flutter widgets are the building blocks of your app's UI. There are two main types:\n\n1. StatelessWidget - Doesn't change over time\n2. StatefulWidget - Can change dynamically\n\nEvery visual element in Flutter is a widget, from buttons to layouts. Would you like me to explain more about a specific type?",
-      isUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 3)),
-    ),
-  ];
+  final List<ChatMessage> _messages = [];
 
   void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+    final userText = _messageController.text.trim();
+    if (userText.isEmpty) return;
 
     setState(() {
       _messages.add(
-        ChatMessage(
-          text: _messageController.text,
-          isUser: true,
-          timestamp: DateTime.now(),
-        ),
+        ChatMessage(text: userText, isUser: true, timestamp: DateTime.now()),
       );
     });
 
     _messageController.clear();
+    _scrollToBottom();
 
-    // Simulate AI response
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    // Generate AI recommendation
+    Future.delayed(const Duration(milliseconds: 900), () {
+      final aiReply = _generateRecommendation(userText);
+
       setState(() {
         _messages.add(
-          ChatMessage(
-            text: "That's a great question! Let me help you with that...",
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
+          ChatMessage(text: aiReply, isUser: false, timestamp: DateTime.now()),
         );
       });
 
       _scrollToBottom();
     });
+  }
 
-    _scrollToBottom();
+  String _generateRecommendation(String prompt) {
+    final text = prompt.toLowerCase();
+
+    if (text.contains("flutter") || text.contains("widget")) {
+      return """
+Here are some learning recommendations based on your interest in Flutter 👇
+
+🔥 **Recommended Topics**
+1. **Flutter Widgets 101**
+   • Learn Stateless & Stateful widgets  
+   • Duration: 45 mins  
+   • Level: Beginner  
+
+2. **Layouts in Flutter**
+   • Row, Column, Stack, Expanded  
+   • Duration: 1 hour  
+
+3. **Building Responsive UI**
+   • MediaQuery, LayoutBuilder  
+   • Duration: 50 mins  
+
+✨ **Next Step:**  
+Would you like a curated beginner → advanced Flutter learning path?
+""";
+    }
+
+    if (text.contains("python")) {
+      return """
+Here are some Python learning recommendations 📘🐍
+
+🔥 **Recommended Learning Path**
+1. **Python Basics**
+   • Variables, loops, functions  
+   • Duration: 1 hour  
+   • Level: Beginner  
+
+2. **Data Handling**
+   • Lists, dictionaries, file handling  
+   • Duration: 45 mins  
+
+3. **Mini Project**
+   • Build a simple calculator or to-do app  
+
+✨ Let me know if you want Python interview prep material!
+""";
+    }
+
+    if (text.contains("web") ||
+        text.contains("javascript") ||
+        text.contains("frontend")) {
+      return """
+Here are some Web Development recommendations 🌐
+
+🔥 **Recommended Modules**
+1. **HTML + CSS Foundations**
+   • Build 3 small interfaces  
+   • Duration: 1.5 hours  
+
+2. **JavaScript Basics**
+   • Variables, DOM, events  
+   • Duration: 1 hour  
+
+3. **React Starter**
+   • Components, props, hooks  
+   • Duration: 2 hours  
+
+✨ Want me to turn these into a structured 7-day learning plan?
+""";
+    }
+
+    return """
+Here are some personalised study recommendations based on your question 📚✨
+
+⭐ **Try exploring these next:**
+1. **Foundational Concepts**
+   • Understand the core idea behind what you're trying to learn.
+
+2. **Beginner-Friendly Tutorial**
+   • A guided module that helps you get started quickly.
+
+3. **Mini Practice Task**
+   • Build a small hands-on example to reinforce your learning.
+
+✨ Tell me your topic (Flutter, Web, Python, AI, etc.) and I'll tailor a full learning path for you.
+""";
   }
 
   void _scrollToBottom() {
@@ -112,12 +177,6 @@ class _UserAiChatState extends State<UserAiChat> {
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.arrow_back, size: 24),
-            color: const Color(0xFF1A1A1A),
-          ),
-          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -278,14 +337,46 @@ class _UserAiChatState extends State<UserAiChat> {
                         ),
                       ],
                     ),
-                    child: Text(
-                      message.text,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: message.isUser
-                            ? Colors.white
-                            : const Color(0xFF1A1A1A),
-                        height: 1.4,
+                    child: MarkdownBody(
+                      data: message.text,
+                      styleSheet: MarkdownStyleSheet(
+                        p: TextStyle(
+                          fontSize: 15,
+                          color: message.isUser
+                              ? Colors.white
+                              : const Color(0xFF1A1A1A),
+                          height: 1.4,
+                        ),
+                        strong: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: message.isUser
+                              ? Colors.white
+                              : const Color(0xFF1A1A1A),
+                        ),
+                        em: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: message.isUser
+                              ? Colors.white
+                              : const Color(0xFF1A1A1A),
+                        ),
+                        h1: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h2: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        h3: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        code: const TextStyle(
+                          backgroundColor: Color(0x22CCCCCC),
+                          fontFamily: "monospace",
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),

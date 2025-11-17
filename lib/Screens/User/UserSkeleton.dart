@@ -52,8 +52,11 @@ class _UserSkeletonState extends State<UserSkeleton>
 
   @override
   Widget build(BuildContext context) {
+    final bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
@@ -81,15 +84,20 @@ class _UserSkeletonState extends State<UserSkeleton>
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: isKeyboardOpen ? 0 : null,
+        child: isKeyboardOpen
+            ? const SizedBox.shrink()
+            : SafeArea(bottom: true, child: _buildBottomNavBar()),
+      ),
     );
   }
 
-  // -------------------- Bottom Navigation Bar --------------------
   Widget _buildBottomNavBar() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),

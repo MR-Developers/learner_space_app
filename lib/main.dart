@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Screens/User/CourseDetails.dart';
 import 'package:learner_space_app/Screens/User/SplashScreen.dart';
 import 'package:learner_space_app/Screens/User/UserSkeleton.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +7,6 @@ import 'package:provider/provider.dart';
 //#region Screens
 import 'package:learner_space_app/Screens/User/GetStartedPage.dart';
 import 'package:learner_space_app/Screens/User/Signup.dart';
-import 'package:learner_space_app/Screens/User/UserHome.dart';
 import 'package:learner_space_app/Screens/User/UserLogin.dart';
 //#endregion
 
@@ -66,8 +66,12 @@ class MyApp extends StatelessWidget {
           "/signUp": (context) => const UserSignup(),
           "/home": (context) => const UserSkeleton(initialIndex: 0),
           "/courses": (context) => const UserSkeleton(initialIndex: 1),
-          "/aichat": (context) => const UserSkeleton(initialIndex: 2),
+          "/aiChat": (context) => const UserSkeleton(initialIndex: 2),
           "/profile": (context) => const UserSkeleton(initialIndex: 3),
+          "/courseDetails": (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as String;
+            return CourseDetailPage(id: args);
+          },
         },
         //#endregion
       ),
