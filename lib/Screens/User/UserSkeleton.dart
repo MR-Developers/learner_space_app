@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:learner_space_app/Screens/User/UserAIChat.dart';
 import 'package:learner_space_app/Screens/User/UserCommunity.dart';
+import 'package:learner_space_app/Screens/User/UserCourses.dart';
 import 'package:learner_space_app/Screens/User/UserHome.dart';
 import 'package:learner_space_app/Screens/User/UserProfile.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -15,12 +15,15 @@ class UserSkeleton extends StatefulWidget {
 
 class _UserSkeletonState extends State<UserSkeleton>
     with SingleTickerProviderStateMixin {
+  // Define brand color constant
+  static const Color brandColor = Color(0xFFEF7C08);
+
   late int _currentIndex;
   late AnimationController _animationController;
 
   final List<Widget> _screens = const [
     UserHome(),
-    Center(child: Text("Courses Page")),
+    UserCourses(),
     UserCommunity(),
     UserProfile(),
   ];
@@ -101,42 +104,30 @@ class _UserSkeletonState extends State<UserSkeleton>
   }
 
   Widget _buildFloatingChatButton() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, "/aiChat");
-      }, // Navigate to AI Chat
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.orange.shade500, Colors.orange.shade300],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(32),
+        onTap: () => Navigator.pushNamed(context, "/aiChat"),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [brandColor, brandColor.withOpacity(0.8)],
+            ),
+            borderRadius: BorderRadius.circular(32),
           ),
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.orange.withOpacity(0.35),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(LucideIcons.sparkles, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            const Text(
-              "Chat with AI",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(LucideIcons.sparkles, color: Colors.white, size: 20),
+              SizedBox(width: 10),
+              Text(
+                "Chat with AI",
+                style: TextStyle(color: Colors.white, fontSize: 15),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -144,7 +135,7 @@ class _UserSkeletonState extends State<UserSkeleton>
 
   Widget _buildBottomNavBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: const [
@@ -156,31 +147,38 @@ class _UserSkeletonState extends State<UserSkeleton>
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _BottomNavItem(
-            icon: Icons.home_rounded,
-            label: "Home",
-            active: _currentIndex == 0,
-            onTap: () => _onNavItemTapped(0),
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.home_rounded,
+              label: "Home",
+              active: _currentIndex == 0,
+              onTap: () => _onNavItemTapped(0),
+            ),
           ),
-          _BottomNavItem(
-            icon: Icons.play_circle_outline,
-            label: "Courses",
-            active: _currentIndex == 1,
-            onTap: () => _onNavItemTapped(1),
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.play_circle_outline,
+              label: "Courses",
+              active: _currentIndex == 1,
+              onTap: () => _onNavItemTapped(1),
+            ),
           ),
-          _BottomNavItem(
-            icon: Icons.chat_bubble_outline,
-            label: "Community",
-            active: _currentIndex == 2,
-            onTap: () => _onNavItemTapped(2),
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.chat_bubble_outline,
+              label: "Community",
+              active: _currentIndex == 2,
+              onTap: () => _onNavItemTapped(2),
+            ),
           ),
-          _BottomNavItem(
-            icon: Icons.person_outline,
-            label: "Profile",
-            active: _currentIndex == 3,
-            onTap: () => _onNavItemTapped(3),
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.person_outline,
+              label: "Profile",
+              active: _currentIndex == 3,
+              onTap: () => _onNavItemTapped(3),
+            ),
           ),
         ],
       ),
@@ -209,6 +207,8 @@ class _BottomNavItem extends StatefulWidget {
 
 class _BottomNavItemState extends State<_BottomNavItem>
     with SingleTickerProviderStateMixin {
+  static const Color brandColor = Color(0xFFEF7C08);
+
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -260,9 +260,7 @@ class _BottomNavItemState extends State<_BottomNavItem>
                 child: Icon(
                   widget.icon,
                   size: 28,
-                  color: widget.active
-                      ? const Color(0xFFFF6B35)
-                      : Colors.grey.shade500,
+                  color: widget.active ? brandColor : Colors.grey.shade500,
                 ),
               ),
               if (widget.label.isNotEmpty)
@@ -273,9 +271,7 @@ class _BottomNavItemState extends State<_BottomNavItem>
                     fontWeight: widget.active
                         ? FontWeight.w600
                         : FontWeight.w500,
-                    color: widget.active
-                        ? const Color(0xFFFF6B35)
-                        : Colors.grey.shade500,
+                    color: widget.active ? brandColor : Colors.grey.shade500,
                     letterSpacing: 0.2,
                   ),
                   child: Padding(

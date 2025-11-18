@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Screens/User/CourseDetails.dart';
+import 'package:learner_space_app/Screens/User/Referrals.dart';
 import 'package:learner_space_app/Screens/User/SplashScreen.dart';
 import 'package:learner_space_app/Screens/User/UserAiChat.dart';
 import 'package:learner_space_app/Screens/User/UserCommunity.dart';
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
             onPrimary: Colors.white,
             primary: Colors.orange,
             outline: Colors.orange,
+            surface: Colors.white,
           ),
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.orange,
@@ -80,6 +82,7 @@ class MyApp extends StatelessWidget {
             final args = ModalRoute.of(context)!.settings.arguments as String;
             return CourseDetailPage(id: args);
           },
+          "/referrals": (context) => const ReferralsPage(),
         },
         //#endregion
       ),

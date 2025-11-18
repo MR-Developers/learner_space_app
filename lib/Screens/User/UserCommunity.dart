@@ -33,6 +33,8 @@ class UserCommunity extends StatefulWidget {
 
 class _UserCommunityState extends State<UserCommunity>
     with SingleTickerProviderStateMixin {
+  static const Color brandColor = Color(0xFFEF7C08);
+
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
 
@@ -117,11 +119,7 @@ class _UserCommunityState extends State<UserCommunity>
                           children: [
                             Row(
                               children: [
-                                Icon(
-                                  Icons.people,
-                                  size: 20,
-                                  color: theme.colorScheme.primary,
-                                ),
+                                Icon(Icons.people, size: 20, color: brandColor),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Community',
@@ -145,6 +143,7 @@ class _UserCommunityState extends State<UserCommunity>
                       FilledButton(
                         onPressed: () {},
                         style: FilledButton.styleFrom(
+                          backgroundColor: brandColor,
                           shape: const CircleBorder(),
                           padding: const EdgeInsets.all(12),
                         ),
@@ -171,9 +170,7 @@ class _UserCommunityState extends State<UserCommunity>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(
-                          color: theme.colorScheme.primary,
-                        ),
+                        borderSide: BorderSide(color: brandColor, width: 2),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -196,11 +193,11 @@ class _UserCommunityState extends State<UserCommunity>
                   Tab(text: 'Career'),
                   Tab(text: 'Referrals'),
                 ],
-                labelColor: theme.colorScheme.primary,
+                labelColor: brandColor,
                 unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(
                   0.6,
                 ),
-                indicatorColor: theme.colorScheme.primary,
+                indicatorColor: brandColor,
               ),
             ),
 
@@ -251,11 +248,11 @@ class _UserCommunityState extends State<UserCommunity>
                     children: [
                       CircleAvatar(
                         radius: 20,
-                        backgroundColor: theme.colorScheme.secondaryContainer,
+                        backgroundColor: brandColor.withOpacity(0.1),
                         child: Text(
                           _getInitials(discussion.author),
                           style: TextStyle(
-                            color: theme.colorScheme.onSecondaryContainer,
+                            color: brandColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -308,8 +305,10 @@ class _UserCommunityState extends State<UserCommunity>
                                   label: Text(discussion.category),
                                   labelStyle: theme.textTheme.labelSmall
                                       ?.copyWith(fontSize: 11),
-                                  backgroundColor:
-                                      theme.colorScheme.secondaryContainer,
+                                  backgroundColor: brandColor.withOpacity(0.1),
+                                  side: BorderSide(
+                                    color: brandColor.withOpacity(0.3),
+                                  ),
                                   padding: EdgeInsets.zero,
                                   materialTapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
@@ -337,7 +336,7 @@ class _UserCommunityState extends State<UserCommunity>
                                           fontSize: 11,
                                           color: Colors.white,
                                         ),
-                                    backgroundColor: theme.colorScheme.primary,
+                                    backgroundColor: brandColor,
                                     padding: EdgeInsets.zero,
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,

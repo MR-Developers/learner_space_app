@@ -11,6 +11,9 @@ class UserHome extends StatefulWidget {
 class _UserHomeState extends State<UserHome> {
   final TextEditingController _searchController = TextEditingController();
 
+  // Define brand color
+  static const Color brandColor = Color(0xFFEF7C08);
+
   String selectedCategory = "All";
 
   final List<Map<String, dynamic>> categories = [
@@ -114,7 +117,12 @@ class _UserHomeState extends State<UserHome> {
             children: [
               _headerIcon(LucideIcons.bell),
               const SizedBox(width: 6),
-              _headerIcon(LucideIcons.user),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/profile");
+                },
+                child: _headerIcon(LucideIcons.user),
+              ),
             ],
           ),
         ],
@@ -171,47 +179,61 @@ class _UserHomeState extends State<UserHome> {
   Widget _buildPremiumReferralBanner() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.orange.shade100, Colors.orange.shade50],
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, "/referrals");
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                brandColor.withOpacity(0.15),
+                brandColor.withOpacity(0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: brandColor),
           ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.orange),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(16),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: brandColor,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  LucideIcons.crown,
+                  color: Colors.white,
+                  size: 26,
+                ),
               ),
-              child: const Icon(
-                LucideIcons.crown,
-                color: Colors.white,
-                size: 26,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Premium Referral Network",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Text(
+                      "Get job referrals from our community • Enroll to unlock",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Premium Referral Network",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                  Text(
-                    "Get job referrals from our community • Enroll to unlock",
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -231,7 +253,7 @@ class _UserHomeState extends State<UserHome> {
             child: ChoiceChip(
               label: Text("${c['name']} (${c['count']})"),
               selected: active,
-              selectedColor: Colors.orange,
+              selectedColor: brandColor,
               backgroundColor: Colors.white,
               showCheckmark: false,
               labelStyle: TextStyle(
@@ -258,7 +280,7 @@ class _UserHomeState extends State<UserHome> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.orange.shade700, Colors.orange.shade500],
+            colors: [brandColor, brandColor.withOpacity(0.8)],
           ),
           borderRadius: BorderRadius.circular(28),
         ),
@@ -323,7 +345,7 @@ class _UserHomeState extends State<UserHome> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 30, color: Colors.orange),
+          Icon(icon, size: 30, color: brandColor),
           const SizedBox(height: 12),
           Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 2),
@@ -348,7 +370,7 @@ class _UserHomeState extends State<UserHome> {
                 "Featured Courses",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              Text("View All", style: TextStyle(color: Colors.orange.shade700)),
+              Text("View All", style: TextStyle(color: brandColor)),
             ],
           ),
           const SizedBox(height: 12),
@@ -486,9 +508,9 @@ class _UserHomeState extends State<UserHome> {
                       const SizedBox(width: 10),
                       Text(
                         course["salary"],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade700,
+                          color: brandColor,
                         ),
                       ),
                     ],

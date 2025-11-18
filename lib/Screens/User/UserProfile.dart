@@ -15,6 +15,8 @@ class MenuItem {
 }
 
 class UserProfile extends StatelessWidget {
+  static const Color brandColor = Color(0xFFEF7C08);
+
   const UserProfile({super.key});
 
   List<MenuItem> get menuItems => [
@@ -61,7 +63,7 @@ class UserProfile extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: brandColor),
           style: IconButton.styleFrom(shape: const CircleBorder()),
         ),
         title: const Text(
@@ -69,15 +71,12 @@ class UserProfile extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
-        actions: [
-          const SizedBox(width: 48), // Spacer for alignment
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Divider(
             height: 1,
             thickness: 1,
-            color: theme.colorScheme.outline.withOpacity(0.2),
+            color: brandColor.withOpacity(0.15),
           ),
         ),
       ),
@@ -95,15 +94,15 @@ class UserProfile extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: theme.colorScheme.outline.withOpacity(0.2),
+                        color: brandColor.withOpacity(0.4),
                         width: 4,
                       ),
-                      color: theme.colorScheme.primary,
+                      color: brandColor,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.person,
                       size: 48,
-                      color: theme.colorScheme.onPrimary,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -159,40 +158,15 @@ class UserProfile extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String value, String label) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Text(
-          value,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMenuItem(BuildContext context, MenuItem item) {
-    final theme = Theme.of(context);
-
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+        side: BorderSide(color: brandColor.withOpacity(0.2)),
       ),
       child: InkWell(
-        onTap: () {
-          // Handle navigation
-        },
+        onTap: () {},
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -202,14 +176,10 @@ class UserProfile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.secondaryContainer,
+                  color: brandColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  item.icon,
-                  size: 20,
-                  color: theme.colorScheme.onSecondaryContainer,
-                ),
+                child: Icon(item.icon, size: 20, color: brandColor),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -218,16 +188,18 @@ class UserProfile extends StatelessWidget {
                   children: [
                     Text(
                       item.label,
-                      style: theme.textTheme.bodyLarge?.copyWith(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w500,
+                        fontSize: 16,
                       ),
                     ),
                     if (item.count != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         '${item.count} items',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        style: TextStyle(
+                          color: Colors.black.withOpacity(0.6),
+                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -237,7 +209,7 @@ class UserProfile extends StatelessWidget {
               Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: brandColor.withOpacity(0.8),
               ),
             ],
           ),
@@ -247,17 +219,14 @@ class UserProfile extends StatelessWidget {
   }
 
   Widget _buildLogoutItem(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+        side: BorderSide(color: brandColor.withOpacity(0.2)),
       ),
       child: InkWell(
         onTap: () {
-          // Handle logout
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -271,12 +240,8 @@ class UserProfile extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    // Perform logout
                   },
-                  child: Text(
-                    'Logout',
-                    style: TextStyle(color: theme.colorScheme.error),
-                  ),
+                  child: Text('Logout', style: TextStyle(color: brandColor)),
                 ),
               ],
             ),
@@ -291,29 +256,26 @@ class UserProfile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.error.withOpacity(0.1),
+                  color: brandColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.logout,
-                  size: 20,
-                  color: theme.colorScheme.error,
-                ),
+                child: Icon(Icons.logout, size: 20, color: brandColor),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   'Logout',
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.error,
+                    fontSize: 16,
+                    color: brandColor,
                   ),
                 ),
               ),
               Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: brandColor.withOpacity(0.8),
               ),
             ],
           ),
