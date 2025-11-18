@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Screens/User/CourseDetails.dart';
 import 'package:learner_space_app/Screens/User/SplashScreen.dart';
+import 'package:learner_space_app/Screens/User/UserAiChat.dart';
+import 'package:learner_space_app/Screens/User/UserCommunity.dart';
 import 'package:learner_space_app/Screens/User/UserSkeleton.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +40,12 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           fontFamily: "Poppins",
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.orange,
+            onPrimary: Colors.white,
+            primary: Colors.orange,
+            outline: Colors.orange,
+          ),
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
@@ -66,8 +73,9 @@ class MyApp extends StatelessWidget {
           "/signUp": (context) => const UserSignup(),
           "/home": (context) => const UserSkeleton(initialIndex: 0),
           "/courses": (context) => const UserSkeleton(initialIndex: 1),
-          "/aiChat": (context) => const UserSkeleton(initialIndex: 2),
+          "/community": (context) => const UserSkeleton(initialIndex: 2),
           "/profile": (context) => const UserSkeleton(initialIndex: 3),
+          "/aiChat": (context) => const UserAiChat(),
           "/courseDetails": (context) {
             final args = ModalRoute.of(context)!.settings.arguments as String;
             return CourseDetailPage(id: args);

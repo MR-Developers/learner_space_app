@@ -177,7 +177,14 @@ Here are some personalised study recommendations based on your question 📚✨
       ),
       child: Row(
         children: [
+          IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
           Container(
+            margin: EdgeInsets.only(left: 10),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               gradient: const LinearGradient(

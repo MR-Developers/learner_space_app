@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Screens/User/UserAIChat.dart';
+import 'package:learner_space_app/Screens/User/UserCommunity.dart';
 import 'package:learner_space_app/Screens/User/UserHome.dart';
 import 'package:learner_space_app/Screens/User/UserProfile.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class UserSkeleton extends StatefulWidget {
   final int initialIndex;
@@ -19,7 +21,7 @@ class _UserSkeletonState extends State<UserSkeleton>
   final List<Widget> _screens = const [
     UserHome(),
     Center(child: Text("Courses Page")),
-    UserAiChat(),
+    UserCommunity(),
     UserProfile(),
   ];
 
@@ -84,12 +86,58 @@ class _UserSkeletonState extends State<UserSkeleton>
           ),
         ),
       ),
+      floatingActionButton: isKeyboardOpen ? null : _buildFloatingChatButton(),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         height: isKeyboardOpen ? 0 : null,
         child: isKeyboardOpen
             ? const SizedBox.shrink()
-            : SafeArea(bottom: true, child: _buildBottomNavBar()),
+            : SafeArea(child: _buildBottomNavBar()),
+      ),
+    );
+  }
+
+  Widget _buildFloatingChatButton() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, "/aiChat");
+      }, // Navigate to AI Chat
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.orange.shade500, Colors.orange.shade300],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.orange.withOpacity(0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.sparkles, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            const Text(
+              "Chat with AI",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -97,10 +145,8 @@ class _UserSkeletonState extends State<UserSkeleton>
   Widget _buildBottomNavBar() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 5),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
         boxShadow: const [
           BoxShadow(
             color: Color(0x33000000),
@@ -110,7 +156,7 @@ class _UserSkeletonState extends State<UserSkeleton>
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _BottomNavItem(
             icon: Icons.home_rounded,
@@ -126,7 +172,7 @@ class _UserSkeletonState extends State<UserSkeleton>
           ),
           _BottomNavItem(
             icon: Icons.chat_bubble_outline,
-            label: "AI",
+            label: "Community",
             active: _currentIndex == 2,
             onTap: () => _onNavItemTapped(2),
           ),
@@ -211,28 +257,24 @@ class _BottomNavItemState extends State<_BottomNavItem>
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: widget.active
-                      ? const Color(0xFFFF6B35)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                ),
                 child: Icon(
                   widget.icon,
-                  color: widget.active ? Colors.white : Colors.grey.shade500,
-                  size: 26,
+                  size: 28,
+                  color: widget.active
+                      ? const Color(0xFFFF6B35)
+                      : Colors.grey.shade500,
                 ),
               ),
               if (widget.label.isNotEmpty)
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 200),
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: widget.active
                         ? FontWeight.w600
                         : FontWeight.w500,
                     color: widget.active
-                        ? const Color(0xFF1A1A1A)
+                        ? const Color(0xFFFF6B35)
                         : Colors.grey.shade500,
                     letterSpacing: 0.2,
                   ),
