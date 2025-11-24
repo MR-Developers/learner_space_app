@@ -141,7 +141,9 @@ class _UserCommunityState extends State<UserCommunity>
                         ),
                       ),
                       FilledButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(context, "/userPostPage");
+                        },
                         style: FilledButton.styleFrom(
                           backgroundColor: brandColor,
                           shape: const CircleBorder(),
@@ -150,33 +152,6 @@ class _UserCommunityState extends State<UserCommunity>
                         child: const Icon(Icons.add, size: 20),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Search Bar
-                  TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search discussions...',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: brandColor, width: 2),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                    ),
                   ),
                 ],
               ),

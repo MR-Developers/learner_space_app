@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class UserHome extends StatefulWidget {
@@ -15,6 +16,22 @@ class _UserHomeState extends State<UserHome> {
   static const Color brandColor = Color(0xFFEF7C08);
 
   String selectedCategory = "All";
+  void _openFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      useSafeArea: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: const FilterSheetTwoPane(),
+        );
+      },
+    );
+  }
 
   final List<Map<String, dynamic>> categories = [
     {"name": "All", "count": 1234},
@@ -166,7 +183,7 @@ class _UserHomeState extends State<UserHome> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                onPressed: () {},
+                onPressed: _openFilterSheet,
                 icon: const Icon(LucideIcons.filter),
               ),
             ),
@@ -328,7 +345,14 @@ class _UserHomeState extends State<UserHome> {
         children: [
           Expanded(child: _quickCard("Reviews", LucideIcons.star)),
           const SizedBox(width: 12),
-          Expanded(child: _quickCard("Outcomes", LucideIcons.trendingUp)),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, "/userOutcomes");
+              },
+              child: _quickCard("Outcomes", LucideIcons.trendingUp),
+            ),
+          ),
         ],
       ),
     );

@@ -24,7 +24,15 @@ class AuthRepository {
 
   Future<void> signup(UserSignUpFormValues form) async {
     final data = await _authService.signup(form);
-    final token = data['token'];
-    if (token != null) {}
+    final token = data['accessToken'];
+    final refreshToken = data['refreshToken'];
+    if (token != null && refreshToken != null) {
+      await _secureStorage.write(key: 'accessToken', value: token);
+      await _secureStorage.write(key: 'refreshToken', value: refreshToken);
+
+      print("✅ Tokens saved successfully!");
+    } else {
+      print("⚠️ Missing token or refresh token in response!");
+    }
   }
 }

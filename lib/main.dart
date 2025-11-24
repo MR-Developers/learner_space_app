@@ -4,6 +4,8 @@ import 'package:learner_space_app/Screens/User/Referrals.dart';
 import 'package:learner_space_app/Screens/User/SplashScreen.dart';
 import 'package:learner_space_app/Screens/User/UserAiChat.dart';
 import 'package:learner_space_app/Screens/User/UserCommunity.dart';
+import 'package:learner_space_app/Screens/User/UserOutcomes.dart';
+import 'package:learner_space_app/Screens/User/UserPostPage.dart';
 import 'package:learner_space_app/Screens/User/UserSkeleton.dart';
 import 'package:provider/provider.dart';
 
@@ -83,6 +85,8 @@ class MyApp extends StatelessWidget {
             return CourseDetailPage(id: args);
           },
           "/referrals": (context) => const ReferralsPage(),
+          "/userOutcomes": (context) => const UserOutcomes(),
+          "/userPostPage": (context) => const UploadPostPage(),
         },
         //#endregion
       ),

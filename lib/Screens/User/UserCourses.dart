@@ -149,12 +149,6 @@ class _UserCoursesState extends State<UserCourses> {
                   ),
                 ],
               ),
-              const Spacer(),
-              IconButton(
-                style: IconButton.styleFrom(shape: const CircleBorder()),
-                onPressed: () {},
-                icon: Icon(LucideIcons.gitCompare, color: primary),
-              ),
             ],
           ),
 
@@ -212,131 +206,140 @@ class _UserCoursesState extends State<UserCourses> {
   Widget _buildCourseCard(BuildContext context, Map<String, dynamic> course) {
     final theme = Theme.of(context);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black12),
-        borderRadius: BorderRadius.circular(26),
-        color: theme.colorScheme.surface,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // LEFT ICON BOX
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(18),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, "/courseDetails", arguments: course["id"]);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black12),
+          borderRadius: BorderRadius.circular(26),
+          color: theme.colorScheme.surface,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // LEFT ICON BOX
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(LucideIcons.bookOpen, color: primary, size: 34),
             ),
-            child: Icon(LucideIcons.bookOpen, color: primary, size: 34),
-          ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-          // COURSE DETAILS
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // TITLE + VERIFIED BADGE
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        course["title"],
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+            // COURSE DETAILS
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // TITLE + VERIFIED BADGE
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          course["title"],
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
+                      if (course["verified"])
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade500,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: const Text(
+                            "Verified",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+                  Text(
+                    course["startup"],
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.black54,
                     ),
-                    if (course["verified"])
+                  ),
+
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star,
+                        size: 16,
+                        color: primary.withOpacity(0.9),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${course["rating"]}",
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        " (${course["reviews"]})",
+                        style: const TextStyle(color: Colors.black54),
+                      ),
+                      const SizedBox(width: 16),
+                      const Icon(LucideIcons.users, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${course["students"]}",
+                        style: const TextStyle(color: Colors.black87),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                          horizontal: 12,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade500,
+                          color: Colors.black12,
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: const Text(
-                          "Verified",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        child: Text(
+                          course["duration"],
+                          style: const TextStyle(fontSize: 12),
                         ),
                       ),
-                  ],
-                ),
-
-                const SizedBox(height: 4),
-                Text(
-                  course["startup"],
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.black54,
+                      const SizedBox(width: 10),
+                      Text(
+                        course["salary"],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: primary,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.star, size: 16, color: primary.withOpacity(0.9)),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${course["rating"]}",
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      " (${course["reviews"]})",
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(width: 16),
-                    const Icon(LucideIcons.users, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${course["students"]}",
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black12,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Text(
-                        course["duration"],
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      course["salary"],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
