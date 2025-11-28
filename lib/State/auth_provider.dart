@@ -8,6 +8,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  // LOGIN
   Future<void> login(
     BuildContext context,
     String email,
@@ -21,6 +22,7 @@ class AuthProvider extends ChangeNotifier {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       ScaffoldMessenger.of(
@@ -32,6 +34,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // SIGNUP
   Future<void> signup(BuildContext context, UserSignUpFormValues data) async {
     _isLoading = true;
     notifyListeners();
@@ -41,7 +44,31 @@ class AuthProvider extends ChangeNotifier {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account Created Successfully')),
       );
+
       Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // LOGOUT
+  Future<void> logout(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _repo.logout();
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Logged out successfully')));
+
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     } catch (e) {
       ScaffoldMessenger.of(
         context,

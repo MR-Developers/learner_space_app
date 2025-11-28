@@ -1,6 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
+import 'package:learner_space_app/Data/Models/CourseModel.dart';
+import 'package:learner_space_app/Utils/Enums.dart';
+import 'package:learner_space_app/Utils/Loaders.dart';
+import 'package:learner_space_app/Utils/UserSession.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:learner_space_app/Apis/Services/course_service.dart';
 
 class UserCourses extends StatefulWidget {
   const UserCourses({super.key});
@@ -27,72 +34,58 @@ class _UserCoursesState extends State<UserCourses> {
   String refundPolicy = "";
   String minOutcomes = "0";
   List<String> skills = [];
+  List<dynamic> courses = [];
+  List<dynamic> recommendedCourses = [];
+  bool isLoading = true;
+  String? errorMessage;
 
-  // -----------------------------
   // COURSE LIST
-  // -----------------------------
-  final List<Map<String, dynamic>> courses = [
-    {
-      "id": "1",
-      "title": "Full Stack Web Development Bootcamp",
-      "startup": "CodeMaster Academy",
-      "rating": 4.8,
-      "reviews": 2456,
-      "students": 12400,
-      "salary": "₹8-12 LPA",
-      "duration": "6 months",
-      "category": "Tech",
-      "verified": true,
-    },
-    {
-      "id": "2",
-      "title": "Product Management Masterclass",
-      "startup": "PMSchool",
-      "rating": 4.9,
-      "reviews": 1823,
-      "students": 8900,
-      "salary": "₹12-18 LPA",
-      "duration": "4 months",
-      "category": "Business",
-      "verified": true,
-    },
-    {
-      "id": "3",
-      "title": "UI/UX Design Pro",
-      "startup": "DesignHub",
-      "rating": 4.7,
-      "reviews": 1567,
-      "students": 7200,
-      "salary": "₹6-10 LPA",
-      "duration": "5 months",
-      "category": "Design",
-      "verified": true,
-    },
-    {
-      "id": "4",
-      "title": "Data Science & Machine Learning",
-      "startup": "AILearn",
-      "rating": 4.8,
-      "reviews": 3201,
-      "students": 15600,
-      "salary": "₹10-16 LPA",
-      "duration": "7 months",
-      "category": "Tech",
-      "verified": true,
-    },
-    {
-      "id": "5",
-      "title": "Digital Marketing Mastery",
-      "startup": "GrowthAcademy",
-      "rating": 4.6,
-      "reviews": 1234,
-      "students": 5600,
-      "salary": "₹5-9 LPA",
-      "duration": "3 months",
-      "category": "Marketing",
-      "verified": true,
-    },
-  ];
+  Future<void> _loadCourses() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final userId = await UserSession.getUserId();
+
+      if (userId == null || userId.isEmpty) {
+        throw Exception("User not logged in. UID missing.");
+      }
+
+      final result = await CourseService().getCourses(page: 1, limit: 20);
+      debugPrint(const JsonEncoder.withIndent('  ').convert(result));
+
+      final recommended = await CourseService().getRecommendedCourses(userId);
+
+      setState(() {
+        courses =
+            (result["data"]?["courses"] as List<dynamic>?)
+                ?.map((e) => CourseModel.fromJson(e))
+                .toList() ??
+            [];
+
+        recommendedCourses =
+            (recommended["data"] as List<dynamic>?)
+                ?.map((e) => CourseModel.fromJson(e))
+                .toList() ??
+            [];
+
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCourses();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,12 +97,31 @@ class _UserCoursesState extends State<UserCourses> {
         children: [
           _buildHeader(theme),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-                children: [...courses.map((c) => _buildCourseCard(context, c))],
-              ),
-            ),
+            child: isLoading
+                ? _buildLoader()
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (recommendedCourses.isNotEmpty)
+                          _buildRecommendedSection(context),
+                        Text(
+                          "Featured Courses",
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
+                        ...courses.map((c) => _buildCourseCard(context, c)),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
@@ -200,15 +212,111 @@ class _UserCoursesState extends State<UserCourses> {
     );
   }
 
-  // -----------------------------
-  // COURSE LIST ITEM
-  // -----------------------------
-  Widget _buildCourseCard(BuildContext context, Map<String, dynamic> course) {
+  Widget _buildRecommendedCard(BuildContext context, CourseModel course) {
     final theme = Theme.of(context);
+
+    final imageUrl = course.courseImage.isNotEmpty
+        ? course.courseImage.first
+        : "";
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, "/courseDetails", arguments: course["id"]);
+        Navigator.pushNamed(context, "/courseDetails", arguments: course.id);
+      },
+      child: Container(
+        width: 160,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.black12),
+          color: Colors.white,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      width: 160,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      width: 160,
+                      height: 80,
+                      color: Colors.grey.shade300,
+                      child: const Icon(Icons.image, size: 35),
+                    ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              course.courseName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              "₹${course.price}",
+              style: const TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendedSection(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final List topThree = recommendedCourses.take(3).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Recommended for You",
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        ...topThree.map((c) => _buildCourseCard(context, c)),
+      ],
+    );
+  }
+
+  Widget _buildCourseCard(BuildContext context, CourseModel course) {
+    final theme = Theme.of(context);
+
+    final String title = course.courseName;
+    final String startup = course.companyName;
+
+    final rating = course.noOfLeads.toDouble();
+    final reviews = course.noOfLeads;
+    final students = course.noOfLeads;
+
+    final price = "₹${course.price}";
+
+    final duration = "${course.duration.value} ${course.duration.unit.label}";
+
+    final imageUrl = course.courseImage.isNotEmpty ? course.courseImage[0] : "";
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, "/courseDetails", arguments: course.id);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -221,94 +329,76 @@ class _UserCoursesState extends State<UserCourses> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // LEFT ICON BOX
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(LucideIcons.bookOpen, color: primary, size: 34),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      width: 70,
+                      height: 70,
+                      color: Colors.grey.shade200,
+                      child: Icon(
+                        LucideIcons.bookOpen,
+                        color: Colors.orange,
+                        size: 34,
+                      ),
+                    ),
             ),
             const SizedBox(width: 16),
 
-            // COURSE DETAILS
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TITLE + VERIFIED BADGE
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          course["title"],
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (course["verified"])
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade500,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: const Text(
-                            "Verified",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                    ],
+                  Text(
+                    title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
 
                   const SizedBox(height: 4),
+
                   Text(
-                    course["startup"],
+                    startup,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.black54,
                     ),
                   ),
 
                   const SizedBox(height: 8),
+
                   Row(
                     children: [
-                      Icon(
-                        Icons.star,
-                        size: 16,
-                        color: primary.withOpacity(0.9),
-                      ),
+                      Icon(Icons.star, size: 16, color: Colors.orange),
                       const SizedBox(width: 4),
                       Text(
-                        "${course["rating"]}",
+                        "$rating",
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        " (${course["reviews"]})",
+                        " ($reviews)",
                         style: const TextStyle(color: Colors.black54),
                       ),
                       const SizedBox(width: 16),
                       const Icon(LucideIcons.users, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        "${course["students"]}",
+                        "$students",
                         style: const TextStyle(color: Colors.black87),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 12),
+
                   Row(
                     children: [
                       Container(
@@ -321,16 +411,16 @@ class _UserCoursesState extends State<UserCourses> {
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: Text(
-                          course["duration"],
+                          duration,
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        course["salary"],
+                        price,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: primary,
+                          color: Colors.orange,
                         ),
                       ),
                     ],
@@ -352,7 +442,7 @@ class _UserCoursesState extends State<UserCourses> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      useSafeArea: true, // <-- IMPORTANT
+      useSafeArea: true,
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
@@ -393,6 +483,10 @@ class _UserCoursesState extends State<UserCourses> {
         ),
       ],
     );
+  }
+
+  Widget _buildLoader() {
+    return ProfessionalCourseLoader();
   }
 
   Widget _buildCheckboxGroup({

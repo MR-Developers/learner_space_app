@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:learner_space_app/Screens/User/UserCommunity.dart';
-import 'package:learner_space_app/Screens/User/UserCourses.dart';
-import 'package:learner_space_app/Screens/User/UserHome.dart';
-import 'package:learner_space_app/Screens/User/UserProfile.dart';
+import 'package:learner_space_app/Screens/Learner/UserCommunity.dart';
+import 'package:learner_space_app/Screens/Learner/UserCourses.dart';
+import 'package:learner_space_app/Screens/Learner/UserHome.dart';
+import 'package:learner_space_app/Screens/Learner/UserProfile.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class UserSkeleton extends StatefulWidget {

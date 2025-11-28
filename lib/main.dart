@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:learner_space_app/Screens/User/CourseDetails.dart';
-import 'package:learner_space_app/Screens/User/Referrals.dart';
-import 'package:learner_space_app/Screens/User/SplashScreen.dart';
-import 'package:learner_space_app/Screens/User/UserAiChat.dart';
-import 'package:learner_space_app/Screens/User/UserCommunity.dart';
-import 'package:learner_space_app/Screens/User/UserOutcomes.dart';
-import 'package:learner_space_app/Screens/User/UserPostPage.dart';
-import 'package:learner_space_app/Screens/User/UserSkeleton.dart';
+import 'package:learner_space_app/Screens/Learner/CourseDetails.dart';
+import 'package:learner_space_app/Screens/Learner/Referrals.dart';
+import 'package:learner_space_app/Screens/Learner/SplashScreen.dart';
+import 'package:learner_space_app/Screens/Learner/UserAiChat.dart';
+import 'package:learner_space_app/Screens/Learner/UserCommunity.dart';
+import 'package:learner_space_app/Screens/Learner/UserOutcomes.dart';
+import 'package:learner_space_app/Screens/Learner/UserPostPage.dart';
+import 'package:learner_space_app/Screens/Learner/UserSkeleton.dart';
 import 'package:provider/provider.dart';
 
 //#region Screens
-import 'package:learner_space_app/Screens/User/GetStartedPage.dart';
-import 'package:learner_space_app/Screens/User/Signup.dart';
-import 'package:learner_space_app/Screens/User/UserLogin.dart';
+import 'package:learner_space_app/Screens/Learner/GetStartedPage.dart';
+import 'package:learner_space_app/Screens/Learner/Signup.dart';
+import 'package:learner_space_app/Screens/Learner/UserLogin.dart';
 //#endregion
 
 //#region Providers

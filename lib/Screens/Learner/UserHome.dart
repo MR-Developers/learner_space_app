@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
+import 'package:learner_space_app/Data/Models/CourseModel.dart';
+import 'package:learner_space_app/Utils/Enums.dart';
+import 'package:learner_space_app/Utils/UserSession.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class UserHome extends StatefulWidget {
@@ -41,41 +45,66 @@ class _UserHomeState extends State<UserHome> {
     {"name": "Marketing", "count": 145},
   ];
 
-  final List<Map<String, dynamic>> featuredCourses = [
-    {
-      "id": "1",
-      "title": "Full Stack Web Development Bootcamp",
-      "startup": "CodeMaster Academy",
-      "rating": 4.8,
-      "reviews": 2456,
-      "students": 12400,
-      "salary": "₹8–12 LPA",
-      "duration": "6 months",
-      "verified": true,
-    },
-    {
-      "id": "2",
-      "title": "Product Management Masterclass",
-      "startup": "PMSchool",
-      "rating": 4.9,
-      "reviews": 1823,
-      "students": 8900,
-      "salary": "₹12–18 LPA",
-      "duration": "4 months",
-      "verified": true,
-    },
-    {
-      "id": "3",
-      "title": "UI/UX Design Pro",
-      "startup": "DesignHub",
-      "rating": 4.7,
-      "reviews": 1567,
-      "students": 7200,
-      "salary": "₹6–10 LPA",
-      "duration": "5 months",
-      "verified": true,
-    },
-  ];
+  List<CourseModel> recommendedCourses = [];
+  bool isLoading = true;
+  String? errorMessage;
+  Future<void> _loadRecommendedCourses() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final userId = await UserSession.getUserId();
+      if (userId == null || userId.isEmpty) {
+        throw Exception("User ID missing");
+      }
+
+      final response = await CourseService().getRecommendedCourses(userId);
+
+      recommendedCourses = (response["data"] as List<dynamic>)
+          .map((e) => CourseModel.fromJson(e))
+          .toList();
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendedCourses();
+  }
+
+  Widget _buildRecommendedSection() {
+    if (recommendedCourses.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Recommended For You",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+
+          Column(
+            children: recommendedCourses.take(3).map((course) {
+              return _courseCard(course);
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -401,7 +430,7 @@ class _UserHomeState extends State<UserHome> {
 
           // Course cards
           Column(
-            children: featuredCourses.map((course) {
+            children: recommendedCourses.map((course) {
               return _courseCard(course);
             }).toList(),
           ),
@@ -410,10 +439,11 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  Widget _courseCard(Map<String, dynamic> course) {
+  Widget _courseCard(CourseModel course) {
+    final imageUrl = course.courseImage.isNotEmpty ? course.courseImage[0] : "";
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, "/courseDetails", arguments: course["id"]);
+        Navigator.pushNamed(context, "/courseDetails", arguments: course.id);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -425,16 +455,27 @@ class _UserHomeState extends State<UserHome> {
         ),
         child: Row(
           children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(LucideIcons.bookOpen, size: 36),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      width: 72,
+                      height: 72,
+                      color: Colors.grey.shade200,
+                      child: Icon(
+                        LucideIcons.bookOpen,
+                        color: Colors.orange,
+                        size: 34,
+                      ),
+                    ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,7 +486,7 @@ class _UserHomeState extends State<UserHome> {
                     children: [
                       Expanded(
                         child: Text(
-                          course["title"],
+                          course.courseName,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -454,31 +495,12 @@ class _UserHomeState extends State<UserHome> {
                           ),
                         ),
                       ),
-                      if (course["verified"])
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            "Verified",
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
 
                   const SizedBox(height: 6),
                   Text(
-                    course["startup"],
+                    course.companyName,
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
 
@@ -491,11 +513,11 @@ class _UserHomeState extends State<UserHome> {
                           const Icon(Icons.star, color: Colors.amber, size: 14),
                           const SizedBox(width: 2),
                           Text(
-                            "${course["rating"]}",
+                            "${course.noOfLeads}",
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           Text(
-                            " (${course["reviews"]})",
+                            " (${course.noOfLeads})",
                             style: TextStyle(color: Colors.grey.shade600),
                           ),
                         ],
@@ -505,7 +527,7 @@ class _UserHomeState extends State<UserHome> {
                         children: [
                           const Icon(LucideIcons.users, size: 14),
                           const SizedBox(width: 3),
-                          Text("${course["students"]}"),
+                          Text("${course.noOfLeads}"),
                         ],
                       ),
                     ],
@@ -525,13 +547,13 @@ class _UserHomeState extends State<UserHome> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          course["duration"],
+                          "${course.duration.value} ${course.duration.unit.label}",
                           style: const TextStyle(fontSize: 11),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        course["salary"],
+                        "₹${course.price}",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: brandColor,

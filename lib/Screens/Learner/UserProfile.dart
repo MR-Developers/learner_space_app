@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/State/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class MenuItem {
   final IconData icon;
@@ -219,6 +221,7 @@ class UserProfile extends StatelessWidget {
   }
 
   Widget _buildLogoutItem(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -238,8 +241,8 @@ class UserProfile extends StatelessWidget {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    await authProvider.logout(context);
                   },
                   child: Text('Logout', style: TextStyle(color: brandColor)),
                 ),

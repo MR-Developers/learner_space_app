@@ -1,0 +1,61 @@
+import 'package:dio/dio.dart';
+import 'package:learner_space_app/Core/Network/api_endpoints.dart';
+import '../../core/network/dio_client.dart';
+
+class CourseService {
+  final Dio _dio = DioClient.instance;
+
+  Future<Map<String, dynamic>> getRecommendedCourses(String userId) async {
+    try {
+      final response = await _dio.get(
+        ApiEndpoints.getRecommendedCourses(userId),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? 'Failed to fetch recommended courses';
+      throw Exception(message);
+    }
+  }
+
+  Future<Map<String, dynamic>> getCourses({
+    int page = 1,
+    int limit = 20,
+    int? category,
+    int? companyCategory,
+    int? priceMin,
+    int? priceMax,
+    String? mode,
+    String? language,
+    bool? placementAssistance,
+    String? instructorId,
+  }) async {
+    try {
+      final queryParams = {
+        'page': page,
+        'limit': limit,
+        if (category != null) 'category': category,
+        if (companyCategory != null) 'companyCategory': companyCategory,
+        if (priceMin != null) 'priceMin': priceMin,
+        if (priceMax != null) 'priceMax': priceMax,
+        if (mode != null) 'mode': mode,
+        if (language != null) 'language': language,
+        if (placementAssistance != null)
+          'placementAssistance': placementAssistance.toString(),
+        if (instructorId != null) 'instructorId': instructorId,
+      };
+
+      final response = await _dio.get(
+        ApiEndpoints.getCourses,
+        queryParameters: queryParams,
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? "Failed to fetch course list";
+      throw Exception(message);
+    }
+  }
+}
