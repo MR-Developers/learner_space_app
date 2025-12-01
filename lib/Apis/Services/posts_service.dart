@@ -18,18 +18,6 @@ class PostsService {
     }
   }
 
-  // LIKE POST
-
-  Future<Map<String, dynamic>> likePost(String postId) async {
-    try {
-      final response = await _dio.post(ApiEndpoints.likePost(postId));
-      return response.data;
-    } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Failed to like post";
-      throw Exception(message);
-    }
-  }
-
   // UPDATE POST
 
   Future<Map<String, dynamic>> updatePost(
@@ -62,9 +50,9 @@ class PostsService {
 
   // GET ALL POSTS
 
-  Future<Map<String, dynamic>> getAllPosts() async {
+  Future<Map<String, dynamic>> getAllPosts(String userId) async {
     try {
-      final response = await _dio.get(ApiEndpoints.getAllPosts);
+      final response = await _dio.get(ApiEndpoints.getAllPosts(userId));
       return response.data;
     } on DioException catch (e) {
       final message = e.response?.data?['message'] ?? "Failed to fetch posts";
@@ -87,10 +75,13 @@ class PostsService {
 
   // GET POSTS BY CATEGORY
 
-  Future<Map<String, dynamic>> getPostsByCategory(String category) async {
+  Future<Map<String, dynamic>> getPostsByCategory(
+    String category,
+    String userId,
+  ) async {
     try {
       final response = await _dio.get(
-        ApiEndpoints.getPostsByCategory(category),
+        ApiEndpoints.getPostsByCategory(category, userId),
       );
       return response.data;
     } on DioException catch (e) {

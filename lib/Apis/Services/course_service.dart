@@ -19,6 +19,23 @@ class CourseService {
     }
   }
 
+  Future<Map<String, dynamic>> getRecommendedCourseByCategory(
+    String userId,
+    String categoryId,
+  ) async {
+    try {
+      final response = await _dio.get(
+        ApiEndpoints.getRecommendedCourseByCat(userId, categoryId),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ??
+          'Failed to fetch recommended courses by category';
+      throw Exception(message);
+    }
+  }
+
   Future<Map<String, dynamic>> getCourses({
     int page = 1,
     int limit = 20,

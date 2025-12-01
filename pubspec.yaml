@@ -20,6 +20,7 @@ dependencies:
   intl: ^0.20.2
   lucide_icons: ^0.257.0
   jwt_decoder: ^2.0.1
+  shimmer: ^3.0.0
 
 # -----------------------------
 # 🚀 App Icon Configuration

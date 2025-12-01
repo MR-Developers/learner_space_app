@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Apis/Services/like_service.dart';
 import 'package:learner_space_app/Apis/Services/posts_service.dart';
+import 'package:learner_space_app/Components/Community/CommentBottomSheet.dart';
 import 'package:learner_space_app/Data/Models/PostModel.dart';
+import 'package:learner_space_app/Components/Shimmers/PostsShimmer.dart';
+import 'package:learner_space_app/Utils/UserSession.dart';
 
 class UserCommunity extends StatefulWidget {
   const UserCommunity({super.key});
@@ -15,7 +19,9 @@ class _UserCommunityState extends State<UserCommunity>
 
   late TabController _tabController;
   final PostsService _postsService = PostsService();
+  final LikesService _likesService = LikesService();
   List<Post> discussions = [];
+  Map<String, bool> isLiking = {};
 
   bool isLoading = false;
   String? errorMessage;
@@ -44,18 +50,19 @@ class _UserCommunityState extends State<UserCommunity>
       isLoading = true;
       errorMessage = null;
     });
-
+    final userId = await UserSession.getUserId();
     try {
       Map<String, dynamic> response;
 
       if (category == PostCategory.all) {
-        response = await _postsService.getAllPosts();
+        response = await _postsService.getAllPosts(userId!);
       } else {
         response = await _postsService.getPostsByCategory(
           category.value.toString(),
+          userId!,
         );
       }
-
+      await Future.delayed(Duration(seconds: 3));
       discussions = (response["data"] as List<dynamic>)
           .map((e) => Post.fromJson(e))
           .toList();
@@ -65,6 +72,47 @@ class _UserCommunityState extends State<UserCommunity>
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleLike(Post post) async {
+    if (isLiking[post.id] == true) return;
+
+    final userId = await UserSession.getUserId();
+    if (userId == null) return;
+
+    setState(() {
+      isLiking[post.id] = true;
+
+      if (post.isLiked) {
+        post.isLiked = false;
+        post.likes--;
+      } else {
+        post.isLiked = true;
+        post.likes++;
+      }
+    });
+
+    try {
+      if (post.isLiked) {
+        await _likesService.likePost(post.id, userId);
+      } else {
+        await _likesService.unlikePost(post.id, userId);
+      }
+    } catch (e) {
+      setState(() {
+        if (post.isLiked) {
+          post.isLiked = false;
+          post.likes--;
+        } else {
+          post.isLiked = true;
+          post.likes++;
+        }
+      });
+    } finally {
+      setState(() {
+        isLiking[post.id] = false;
       });
     }
   }
@@ -144,7 +192,7 @@ class _UserCommunityState extends State<UserCommunity>
 
   Widget _buildBody(ThemeData theme) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const PostShimmerLoader();
     }
 
     if (errorMessage != null) {
@@ -222,15 +270,43 @@ class _UserCommunityState extends State<UserCommunity>
 
                   Row(
                     children: [
-                      const Icon(Icons.chat_bubble_outline, size: 16),
-                      const SizedBox(width: 4),
-                      Text("${d.commentNumber} replies"),
+                      GestureDetector(
+                        onTap: () => _openCommentsBottomSheet(d),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.chat_bubble_outline, size: 16),
+                            const SizedBox(width: 4),
+                            Text("${d.commentNumber} replies"),
+                          ],
+                        ),
+                      ),
 
                       const SizedBox(width: 16),
 
-                      const Icon(Icons.thumb_up_outlined, size: 16),
-                      const SizedBox(width: 4),
-                      Text("${d.likes} likes"),
+                      GestureDetector(
+                        onTap: () => _handleLike(d),
+                        child: Row(
+                          children: [
+                            isLiking[d.id] == true
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Icon(
+                                    d.isLiked
+                                        ? Icons.thumb_up
+                                        : Icons.thumb_up_outlined,
+                                    size: 16,
+                                    color: d.isLiked ? brandColor : null,
+                                  ),
+                            const SizedBox(width: 4),
+                            Text("${d.likes} likes"),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -239,6 +315,29 @@ class _UserCommunityState extends State<UserCommunity>
           ],
         ),
       ),
+    );
+  }
+
+  void _openCommentsBottomSheet(Post post) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: CommentBottomSheet(
+            postId: post.id,
+            onCommentAdded: () {
+              _fetchPosts(categories[_tabController.index]);
+            },
+          ),
+        );
+      },
     );
   }
 

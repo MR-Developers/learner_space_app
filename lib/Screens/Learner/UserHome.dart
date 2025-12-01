@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
 import 'package:learner_space_app/Data/Models/CourseModel.dart';
-import 'package:learner_space_app/Utils/Enums.dart';
+import 'package:learner_space_app/Data/Enums/Enums.dart';
 import 'package:learner_space_app/Utils/UserSession.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -20,6 +20,31 @@ class _UserHomeState extends State<UserHome> {
   static const Color brandColor = Color(0xFFEF7C08);
 
   String selectedCategory = "All";
+  List<CourseModel> categoryCourses = [];
+  bool isCategoryLoading = false;
+
+  final List<Map<String, dynamic>> categories = [
+    {"name": "All", "count": 1234},
+    {"name": "Tech", "count": 456},
+    {"name": "Business", "count": 234},
+    {"name": "Design", "count": 178},
+    {"name": "Marketing", "count": 145},
+  ];
+
+  List<CourseModel> recommendedCourses = [];
+  bool isLoading = true;
+  String? errorMessage;
+
+  // NOTE: map from displayed category name -> companyCategoryId
+  // Replace the numbers with the actual companyCategoryId values from your backend.
+  final Map<String, int?> categoryMap = {
+    "All": null,
+    "Tech": 1,
+    "Business": 2,
+    "Design": 3,
+    "Marketing": 4,
+  };
+
   void _openFilterSheet() {
     showModalBottomSheet(
       context: context,
@@ -37,21 +62,12 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  final List<Map<String, dynamic>> categories = [
-    {"name": "All", "count": 1234},
-    {"name": "Tech", "count": 456},
-    {"name": "Business", "count": 234},
-    {"name": "Design", "count": 178},
-    {"name": "Marketing", "count": 145},
-  ];
-
-  List<CourseModel> recommendedCourses = [];
-  bool isLoading = true;
-  String? errorMessage;
   Future<void> _loadRecommendedCourses() async {
     try {
+      if (!mounted) return;
       setState(() {
         isLoading = true;
+        errorMessage = null;
       });
 
       final userId = await UserSession.getUserId();
@@ -61,17 +77,73 @@ class _UserHomeState extends State<UserHome> {
 
       final response = await CourseService().getRecommendedCourses(userId);
 
-      recommendedCourses = (response["data"] as List<dynamic>)
-          .map((e) => CourseModel.fromJson(e))
-          .toList();
+      // safe parse: response["data"] or response
+      final data = response["data"] ?? response;
 
+      final list = (data as List<dynamic>).map((e) {
+        return CourseModel.fromJson(e);
+      }).toList();
+
+      if (!mounted) return;
       setState(() {
+        recommendedCourses = list;
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadCoursesByCategory(String categoryName) async {
+    try {
+      if (!mounted) return;
+      setState(() {
+        isCategoryLoading = true;
+        errorMessage = null;
+      });
+
+      final userId = await UserSession.getUserId();
+      if (userId == null || userId.isEmpty) {
+        throw Exception("User ID missing");
+      }
+
+      final categoryId = categoryMap[categoryName];
+
+      // If "All", clear categoryCourses and reload recommended
+      if (categoryId == null) {
+        // Clear any category-specific data
+        categoryCourses = [];
+        await _loadRecommendedCourses();
+        if (!mounted) return;
+        setState(() => isCategoryLoading = false);
+        return;
+      }
+
+      final response = await CourseService().getRecommendedCourseByCategory(
+        userId,
+        categoryId.toString(),
+      );
+
+      final data = response["data"] ?? response;
+
+      final list = (data as List<dynamic>).map((e) {
+        return CourseModel.fromJson(e);
+      }).toList();
+
+      if (!mounted) return;
+      setState(() {
+        categoryCourses = list;
+        isCategoryLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isCategoryLoading = false;
+        errorMessage = e.toString();
       });
     }
   }
@@ -95,7 +167,6 @@ class _UserHomeState extends State<UserHome> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-
           Column(
             children: recommendedCourses.take(3).map((course) {
               return _courseCard(course);
@@ -108,33 +179,51 @@ class _UserHomeState extends State<UserHome> {
 
   @override
   Widget build(BuildContext context) {
+    // Use a column with an Expanded ListView for the course list so the page scrolls correctly
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: SingleChildScrollView(
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             _buildSearchBar(),
-            const SizedBox(height: 20),
-            _buildPremiumReferralBanner(),
-            const SizedBox(height: 20),
-            _buildStatsCard(),
-            const SizedBox(height: 20),
-            _buildQuickCards(),
-            const SizedBox(height: 20),
-            _buildCategoryChips(),
-            const SizedBox(height: 20),
-            _buildFeaturedCourses(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
+            Expanded(child: _buildContentArea(context)),
           ],
         ),
       ),
     );
   }
 
-  // ---------------- UI BLOCKS ---------------- //
+  Widget _buildContentArea(BuildContext context) {
+    // The content area will be a scrollable ListView so the top parts remain visible
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 24),
+      children: [
+        const SizedBox(height: 8),
+        _buildPremiumReferralBanner(),
+        const SizedBox(height: 16),
+        _buildStatsCard(),
+        const SizedBox(height: 16),
+        _buildQuickCards(),
+        const SizedBox(height: 16),
+        _buildCategoryChips(),
+        const SizedBox(height: 16),
+        // Recommended or Category-specific featured courses
+        if (isLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 40),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else ...[
+          _buildRecommendedSection(),
+          const SizedBox(height: 20),
+          _buildFeaturedCourses(),
+        ],
+      ],
+    );
+  }
 
   Widget _buildHeader() {
     return Container(
@@ -203,7 +292,6 @@ class _UserHomeState extends State<UserHome> {
               ),
             ),
           ),
-
           Positioned(
             right: 6,
             top: 6,
@@ -309,8 +397,10 @@ class _UserHomeState extends State<UserHome> {
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(color: Colors.grey.shade300),
               ),
-              onSelected: (_) {
+              onSelected: (_) async {
+                // Update selection then load
                 setState(() => selectedCategory = c['name']);
+                await _loadCoursesByCategory(selectedCategory);
               },
             ),
           );
@@ -412,6 +502,10 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildFeaturedCourses() {
+    final listToShow = selectedCategory == "All"
+        ? recommendedCourses
+        : categoryCourses;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -419,21 +513,39 @@ class _UserHomeState extends State<UserHome> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Featured Courses",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                selectedCategory == "All"
+                    ? "Featured Courses"
+                    : "Top $selectedCategory Courses",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text("View All", style: TextStyle(color: brandColor)),
             ],
           ),
           const SizedBox(height: 12),
 
-          // Course cards
-          Column(
-            children: recommendedCourses.map((course) {
-              return _courseCard(course);
-            }).toList(),
-          ),
+          if (isCategoryLoading)
+            const Padding(
+              padding: EdgeInsets.all(40),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (listToShow.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(40),
+              child: Text(
+                "No courses found",
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            )
+          else
+            Column(
+              children: listToShow.map((course) {
+                return _courseCard(course);
+              }).toList(),
+            ),
         ],
       ),
     );

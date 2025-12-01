@@ -1,4 +1,4 @@
-import 'package:learner_space_app/Utils/Enums.dart';
+import 'package:learner_space_app/Data/Enums/Enums.dart';
 
 class CourseModel {
   final String id;

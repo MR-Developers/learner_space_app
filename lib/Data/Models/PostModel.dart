@@ -38,13 +38,14 @@ extension PostCategoryExtension on PostCategory {
 }
 
 class Post {
-  final String id;
-  final String description;
-  final String userId;
-  final String userName;
-  final int likes;
-  final int commentNumber;
-  final PostCategory category;
+  String id;
+  String description;
+  String userId;
+  String userName;
+  int likes;
+  int commentNumber;
+  PostCategory category;
+  bool isLiked;
 
   Post({
     required this.id,
@@ -54,6 +55,7 @@ class Post {
     required this.likes,
     required this.commentNumber,
     required this.category,
+    required this.isLiked,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -62,10 +64,12 @@ class Post {
       description: json["description"] ?? "",
       userId: json["userId"] ?? "",
       userName:
-          "${json["userName.firstname"]} ${json["userName.lastname"]}" ?? "",
+          "${json["userName"]["firstname"]} ${json["userName"]["lastname"]}" ??
+          "",
       likes: json["likes"] ?? 0,
       commentNumber: json["commentNumber"] ?? 0,
       category: PostCategoryExtension.fromInt(json["category"] ?? 0),
+      isLiked: json["isLiked"] ?? false,
     );
   }
 }

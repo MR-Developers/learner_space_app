@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Services/posts_service.dart';
-import 'package:learner_space_app/Utils/Enums.dart';
+import 'package:learner_space_app/Data/Enums/Enums.dart';
 import 'package:learner_space_app/Utils/UserSession.dart';
 
 class UploadPostPage extends StatefulWidget {

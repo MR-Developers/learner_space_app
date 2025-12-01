@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
 import 'package:learner_space_app/Data/Models/CourseModel.dart';
-import 'package:learner_space_app/Utils/Enums.dart';
+import 'package:learner_space_app/Data/Enums/Enums.dart';
 import 'package:learner_space_app/Utils/Loaders.dart';
 import 'package:learner_space_app/Utils/UserSession.dart';
 import 'package:lucide_icons/lucide_icons.dart';
