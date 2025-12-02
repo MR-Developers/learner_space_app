@@ -42,4 +42,10 @@ class ApiEndpoints {
   static String getReplies(String commentId) => "/comments/replies/$commentId";
 
   static String deleteComment(String commentId) => "/comments/$commentId";
+
+  //CATEGORIES
+  static const String getAllCategories = "/users/getAllCategories";
+
+  static String getCompanyCategoryCount(int categoryId) =>
+      "/users/companyCategoryCount/$categoryId";
 }

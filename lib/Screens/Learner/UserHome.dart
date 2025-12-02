@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Apis/Services/categories_service.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
 import 'package:learner_space_app/Data/Models/CourseModel.dart';
@@ -16,33 +17,32 @@ class UserHome extends StatefulWidget {
 class _UserHomeState extends State<UserHome> {
   final TextEditingController _searchController = TextEditingController();
 
-  // Define brand color
   static const Color brandColor = Color(0xFFEF7C08);
 
   String selectedCategory = "All";
+  final categoryService = CategoryService();
+
   List<CourseModel> categoryCourses = [];
   bool isCategoryLoading = false;
 
   final List<Map<String, dynamic>> categories = [
-    {"name": "All", "count": 1234},
-    {"name": "Tech", "count": 456},
-    {"name": "Business", "count": 234},
-    {"name": "Design", "count": 178},
-    {"name": "Marketing", "count": 145},
+    {"name": "All", "count": 0},
+    {"name": "Tech", "count": 0},
+    {"name": "Business", "count": 0},
+    {"name": "Design", "count": 0},
+    {"name": "Marketing", "count": 0},
   ];
 
   List<CourseModel> recommendedCourses = [];
   bool isLoading = true;
   String? errorMessage;
 
-  // NOTE: map from displayed category name -> companyCategoryId
-  // Replace the numbers with the actual companyCategoryId values from your backend.
   final Map<String, int?> categoryMap = {
     "All": null,
-    "Tech": 1,
-    "Business": 2,
-    "Design": 3,
-    "Marketing": 4,
+    "Tech": 0,
+    "Business": 1,
+    "Design": 2,
+    "Marketing": 3,
   };
 
   void _openFilterSheet() {
@@ -60,6 +60,29 @@ class _UserHomeState extends State<UserHome> {
         );
       },
     );
+  }
+
+  Future<void> _loadCategoryCounts() async {
+    try {
+      for (var item in categories) {
+        if (item["name"] == "All") continue;
+
+        final categoryId = categoryMap[item["name"]];
+        if (categoryId == null) continue;
+
+        final response = await categoryService.getCompanyCategoryCount(
+          categoryId,
+        );
+
+        final count = response["data"]["courseCount"] ?? 0;
+
+        item["count"] = count;
+      }
+
+      if (mounted) setState(() {});
+    } catch (e) {
+      print("Failed to load counts: $e");
+    }
   }
 
   Future<void> _loadRecommendedCourses() async {
@@ -151,6 +174,7 @@ class _UserHomeState extends State<UserHome> {
   @override
   void initState() {
     super.initState();
+    _loadCategoryCounts();
     _loadRecommendedCourses();
   }
 
@@ -217,8 +241,10 @@ class _UserHomeState extends State<UserHome> {
             child: Center(child: CircularProgressIndicator()),
           )
         else ...[
-          _buildRecommendedSection(),
-          const SizedBox(height: 20),
+          if (selectedCategory == "All") ...[
+            _buildRecommendedSection(),
+            const SizedBox(height: 20),
+          ],
           _buildFeaturedCourses(),
         ],
       ],
