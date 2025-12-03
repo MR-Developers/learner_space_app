@@ -24,6 +24,7 @@ class _UserCoursesState extends State<UserCourses> {
   // -----------------------------
   RangeValues priceRange = const RangeValues(0, 200000);
   List<String> selectedCategories = [];
+  List<String> selectedLanguages = [];
   String duration = "";
   String minRating = "0";
   String placementType = "";
@@ -53,7 +54,16 @@ class _UserCoursesState extends State<UserCourses> {
         throw Exception("User not logged in. UID missing.");
       }
 
-      final result = await CourseService().getCourses(page: 1, limit: 20);
+      final result = await CourseService().getCourses(
+        page: 1,
+        limit: 20,
+        courseCategory: selectedCategories,
+        priceMin: priceRange.start,
+        priceMax: priceRange.end,
+        mode: mode,
+        language: selectedLanguages.isNotEmpty ? selectedLanguages.first : null,
+      );
+
       debugPrint(const JsonEncoder.withIndent('  ').convert(result));
 
       final recommended = await CourseService().getRecommendedCourses(userId);
@@ -437,8 +447,8 @@ class _UserCoursesState extends State<UserCourses> {
   // -----------------------------
   // FILTER SHEET (BOTTOM SHEET)
   // -----------------------------
-  void _openFilterSheet() {
-    showModalBottomSheet(
+  void _openFilterSheet() async {
+    final filters = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
@@ -452,6 +462,27 @@ class _UserCoursesState extends State<UserCourses> {
         );
       },
     );
+
+    if (filters != null) {
+      _applyFilters(filters);
+    }
+  }
+
+  void _applyFilters(Map<String, dynamic> filters) {
+    setState(() {
+      selectedCategories = filters["categories"] ?? [];
+      selectedLanguages = filters["languages"] ?? [];
+
+      double minP = filters["minPrice"] ?? 0.0;
+      double maxP = filters["maxPrice"] ?? 200000.0;
+      priceRange = RangeValues(minP, maxP);
+
+      minRating = filters["rating"] ?? "0";
+
+      mode = filters["modes"]?.isNotEmpty == true ? filters["modes"][0] : "";
+    });
+
+    _loadCourses();
   }
 
   // -----------------------------

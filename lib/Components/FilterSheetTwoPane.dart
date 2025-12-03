@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Apis/Services/course_service.dart';
+import 'package:learner_space_app/Apis/Services/categories_service.dart';
 
 class FilterSheetTwoPane extends StatefulWidget {
   const FilterSheetTwoPane({super.key});
@@ -13,6 +17,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   int selectedIndex = 0;
 
   final List<String> filterSections = [
+    "Categories",
     "Language",
     "Price",
     "Customer Rating",
@@ -22,6 +27,11 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
     "Placement assistance",
     "Mode",
   ];
+
+  //CATEGORIES
+  List<dynamic> categories = [];
+  List<String> selectedCategories = [];
+  bool isLoadingCategories = true;
 
   // LANGUAGE
   final List<String> languages = [
@@ -36,6 +46,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
 
   // PRICE
   RangeValues price = const RangeValues(0, 50000);
+  double minPrice = 0;
+  double maxPrice = 50000;
 
   // CUSTOMER RATING
   String rating = "Any";
@@ -61,6 +73,33 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   // MODE
   final List<String> modes = ["Online", "Offline", "Hybrid"];
   List<String> selectedModes = [];
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final response = await CategoryService().getAllCategories();
+      printFull(response);
+      // Your API returns a MAP, so extract the list
+      categories = response["data"] ?? response["categories"] ?? [];
+
+      setState(() {
+        isLoadingCategories = false;
+      });
+    } catch (e) {
+      isLoadingCategories = false;
+      setState(() {});
+    }
+  }
+
+  void printFull(Object? value) {
+    final jsonString = const JsonEncoder.withIndent('  ').convert(value);
+    final pattern = RegExp('.{1,800}'); // print 800 characters at a time
+    pattern.allMatches(jsonString).forEach((match) => print(match.group(0)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +145,17 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          Navigator.pop(context, {
+                            "categories": selectedCategories,
+                            "languages": selectedLanguages,
+                            "minPrice": minPrice,
+                            "maxPrice": maxPrice,
+                            "rating": rating,
+                            "modes": selectedModes,
+                            "offers": selectedOffers,
+                          });
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: brandColor,
                           shape: RoundedRectangleBorder(
@@ -175,24 +224,43 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   Widget _buildRightPanel() {
     switch (selectedIndex) {
       case 0:
-        return _buildLanguageFilter();
+        return _buildCategoryFilter(); // 👈 NEW
       case 1:
-        return _buildPriceFilter();
+        return _buildLanguageFilter();
       case 2:
-        return _buildRatingFilter();
+        return _buildPriceFilter();
       case 3:
-        return _buildArrivalFilter();
+        return _buildRatingFilter();
       case 4:
-        return _buildOffersFilter();
+        return _buildArrivalFilter();
       case 5:
-        return _buildScholarshipFilter();
+        return _buildOffersFilter();
       case 6:
-        return _buildPlacementFilter();
+        return _buildScholarshipFilter();
       case 7:
+        return _buildPlacementFilter();
+      case 8:
         return _buildModeFilter();
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildCategoryFilter() {
+    if (isLoadingCategories) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (categories.isEmpty) {
+      return const Center(child: Text("No categories available"));
+    }
+
+    return ListView(
+      children: [
+        for (var cat in categories)
+          _buildCheckbox(cat["name"], selectedCategories),
+      ],
+    );
   }
 
   // ---------------- LANGUAGE UI ----------------
@@ -211,18 +279,71 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
       children: [
         const Text("Select Price", style: TextStyle(fontSize: 18)),
         const SizedBox(height: 20),
+
+        // 🔶 RANGE SLIDER
         RangeSlider(
-          values: price,
+          values: RangeValues(minPrice, maxPrice),
           min: 0,
           max: 100000,
           activeColor: brandColor,
-          onChanged: (v) => setState(() => price = v),
+          onChanged: (v) {
+            setState(() {
+              minPrice = v.start;
+              maxPrice = v.end;
+            });
+          },
         ),
+
+        const SizedBox(height: 12),
+
+        // 🔶 MIN & MAX PRICE INPUTS
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("₹${price.start.toInt()}"),
-            Text("₹${price.end.toInt()}"),
+            // MIN PRICE
+            Expanded(
+              child: TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: "Min Price",
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  double val = double.tryParse(value) ?? 0;
+                  if (val <= maxPrice) {
+                    setState(() {
+                      minPrice = val;
+                    });
+                  }
+                },
+                controller: TextEditingController(
+                  text: minPrice.toInt().toString(),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            // MAX PRICE
+            Expanded(
+              child: TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: "Max Price",
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  double val = double.tryParse(value) ?? maxPrice;
+                  if (val >= minPrice) {
+                    setState(() {
+                      maxPrice = val;
+                    });
+                  }
+                },
+                controller: TextEditingController(
+                  text: maxPrice.toInt().toString(),
+                ),
+              ),
+            ),
           ],
         ),
       ],

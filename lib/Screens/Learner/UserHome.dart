@@ -64,6 +64,8 @@ class _UserHomeState extends State<UserHome> {
 
   Future<void> _loadCategoryCounts() async {
     try {
+      num totalCount = 0;
+
       for (var item in categories) {
         if (item["name"] == "All") continue;
 
@@ -77,7 +79,15 @@ class _UserHomeState extends State<UserHome> {
         final count = response["data"]["courseCount"] ?? 0;
 
         item["count"] = count;
+        totalCount += count;
       }
+
+      final allItem = categories.firstWhere(
+        (e) => e["name"] == "All",
+        orElse: () => {"name": "All", "count": 0},
+      );
+
+      allItem["count"] = totalCount;
 
       if (mounted) setState(() {});
     } catch (e) {
