@@ -3,9 +3,27 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Apis/Services/categories_service.dart';
+import 'package:learner_space_app/Data/Enums/Enums.dart';
 
 class FilterSheetTwoPane extends StatefulWidget {
-  const FilterSheetTwoPane({super.key});
+  final List<String> selectedCategories;
+  final List<CourseLanguage> selectedLanguages;
+  final double minPrice;
+  final double maxPrice;
+  final String rating;
+  final List<String> modes;
+  final String placement;
+
+  const FilterSheetTwoPane({
+    super.key,
+    this.selectedCategories = const [],
+    this.selectedLanguages = const [],
+    this.minPrice = 0,
+    this.maxPrice = 50000,
+    this.rating = "Any",
+    this.modes = const [],
+    this.placement = "false",
+  });
 
   @override
   State<FilterSheetTwoPane> createState() => _FilterSheetTwoPaneState();
@@ -22,8 +40,6 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
     "Price",
     "Customer Rating",
     "Latest Arrivals",
-    "Offers",
-    "Scholarship",
     "Placement assistance",
     "Mode",
   ];
@@ -34,15 +50,9 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   bool isLoadingCategories = true;
 
   // LANGUAGE
-  final List<String> languages = [
-    "Telugu",
-    "Hindi",
-    "English",
-    "Tamil",
-    "Kannada",
-    "Marathi",
-  ];
-  List<String> selectedLanguages = [];
+  final List<CourseLanguage> languages = CourseLanguage.values;
+
+  List<CourseLanguage> selectedLanguages = [];
 
   // PRICE
   RangeValues price = const RangeValues(0, 50000);
@@ -55,20 +65,10 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   // LATEST ARRIVALS
   String arrivalFilter = "Any";
 
-  // OFFERS
-  final List<String> offersList = [
-    "Free Demo",
-    "Discount Available",
-    "Cashback",
-    "EMI Options",
-  ];
   List<String> selectedOffers = [];
 
-  // SCHOLARSHIP
-  String scholarship = "Any";
-
   // PLACEMENT
-  String placement = "Any";
+  String? placement;
 
   // MODE
   final List<String> modes = ["Online", "Offline", "Hybrid"];
@@ -76,6 +76,22 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   @override
   void initState() {
     super.initState();
+
+    // restore values from parent
+    selectedCategories = List.from(widget.selectedCategories);
+    selectedLanguages = List.from(widget.selectedLanguages);
+    minPrice = widget.minPrice;
+    maxPrice = widget.maxPrice;
+    rating = widget.rating;
+    selectedModes = List.from(widget.modes);
+    if (widget.placement == "true") {
+      placement = "Yes";
+    } else if (widget.placement == "false") {
+      placement = "No";
+    } else {
+      placement = "Any";
+    }
+
     _loadCategories();
   }
 
@@ -152,8 +168,12 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
                             "minPrice": minPrice,
                             "maxPrice": maxPrice,
                             "rating": rating,
+                            "placement": placement == "Any"
+                                ? null
+                                : placement == "Yes"
+                                ? "true"
+                                : "false",
                             "modes": selectedModes,
-                            "offers": selectedOffers,
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -220,11 +240,10 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
     );
   }
 
-  // ---------------- RIGHT PANEL (Dynamic) ----------------
   Widget _buildRightPanel() {
     switch (selectedIndex) {
       case 0:
-        return _buildCategoryFilter(); // 👈 NEW
+        return _buildCategoryFilter();
       case 1:
         return _buildLanguageFilter();
       case 2:
@@ -234,12 +253,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
       case 4:
         return _buildArrivalFilter();
       case 5:
-        return _buildOffersFilter();
-      case 6:
-        return _buildScholarshipFilter();
-      case 7:
         return _buildPlacementFilter();
-      case 8:
+      case 6:
         return _buildModeFilter();
       default:
         return const SizedBox.shrink();
@@ -257,18 +272,122 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
 
     return ListView(
       children: [
-        for (var cat in categories)
-          _buildCheckbox(cat["name"], selectedCategories),
+        for (var cat in categories) ...[
+          // Main Category Heading
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              cat["name"] ?? "",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // ⭐ Dynamic wrapping subcategories
+          if (cat["courseCategories"] != null)
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: [
+                for (var sub in cat["courseCategories"])
+                  IntrinsicWidth(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minWidth: 120, // Minimum block width
+                        maxWidth: 180, // Max width so multiple can fit
+                      ),
+                      child: _buildCheckboxWithId(
+                        sub["name"],
+                        sub["CourseCategoryId"],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+
+          const SizedBox(height: 20),
+        ],
       ],
+    );
+  }
+
+  Widget _buildCheckboxWithId(String label, String id) {
+    bool checked = selectedCategories.contains(id);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          checked ? selectedCategories.remove(id) : selectedCategories.add(id);
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                border: Border.all(width: 2, color: Colors.black),
+                borderRadius: BorderRadius.circular(8),
+                color: checked ? brandColor : Colors.transparent,
+              ),
+              child: checked
+                  ? const Icon(Icons.check, color: Colors.white, size: 18)
+                  : null,
+            ),
+            const SizedBox(width: 14),
+            Text(label, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+      ),
     );
   }
 
   // ---------------- LANGUAGE UI ----------------
   Widget _buildLanguageFilter() {
     return ListView(
-      children: [
-        for (final lang in languages) _buildCheckbox(lang, selectedLanguages),
-      ],
+      children: [for (final lang in languages) _buildCheckboxLanguage(lang)],
+    );
+  }
+
+  Widget _buildCheckboxLanguage(CourseLanguage lang) {
+    final bool checked = selectedLanguages.contains(lang);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          checked
+              ? selectedLanguages.remove(lang)
+              : selectedLanguages.add(lang);
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        child: Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                border: Border.all(width: 2, color: Colors.black),
+                borderRadius: BorderRadius.circular(8),
+                color: checked ? brandColor : Colors.transparent,
+              ),
+              child: checked
+                  ? const Icon(Icons.check, color: Colors.white, size: 18)
+                  : null,
+            ),
+            const SizedBox(width: 14),
+            Text(lang.label, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -284,7 +403,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
         RangeSlider(
           values: RangeValues(minPrice, maxPrice),
           min: 0,
-          max: 100000,
+          max: 200000,
           activeColor: brandColor,
           onChanged: (v) {
             setState(() {
@@ -306,6 +425,12 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
                 decoration: const InputDecoration(
                   labelText: "Min Price",
                   border: OutlineInputBorder(),
+                  prefixText: "₹ ",
+                  prefixStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 onChanged: (value) {
                   double val = double.tryParse(value) ?? 0;
@@ -330,6 +455,12 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
                 decoration: const InputDecoration(
                   labelText: "Max Price",
                   border: OutlineInputBorder(),
+                  prefixText: "₹ ",
+                  prefixStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 onChanged: (value) {
                   double val = double.tryParse(value) ?? maxPrice;
@@ -378,35 +509,15 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
     );
   }
 
-  // ---------------- OFFERS UI ----------------
-  Widget _buildOffersFilter() {
-    return ListView(
-      children: [
-        for (var offer in offersList) _buildCheckbox(offer, selectedOffers),
-      ],
-    );
-  }
-
-  // ---------------- SCHOLARSHIP UI ----------------
-  Widget _buildScholarshipFilter() {
-    List<String> options = ["Any", "Available", "Not Available"];
-
-    return ListView(
-      children: [
-        for (var opt in options)
-          _buildRadio(opt, scholarship, (v) => setState(() => scholarship = v)),
-      ],
-    );
-  }
-
   // ---------------- PLACEMENT UI ----------------
   Widget _buildPlacementFilter() {
-    List<String> options = ["Any", "Guaranteed", "Assisted", "None"];
+    // Display labels
+    final List<String> options = ["Any", "Yes", "No"];
 
     return ListView(
       children: [
         for (var opt in options)
-          _buildRadio(opt, placement, (v) => setState(() => placement = v)),
+          _buildRadio(opt, placement!, (v) => setState(() => placement = v)),
       ],
     );
   }

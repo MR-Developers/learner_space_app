@@ -46,10 +46,12 @@ class _UserCommunityState extends State<UserCommunity>
   }
 
   Future<void> _fetchPosts(PostCategory category) async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+    }
     final userId = await UserSession.getUserId();
     try {
       Map<String, dynamic> response;
@@ -62,17 +64,21 @@ class _UserCommunityState extends State<UserCommunity>
           userId!,
         );
       }
-      await Future.delayed(Duration(seconds: 3));
+      if (!mounted) return;
       discussions = (response["data"] as List<dynamic>)
           .map((e) => Post.fromJson(e))
           .toList();
 
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = e.toString();
+          isLoading = false;
+        });
+      }
     }
   }
 

@@ -24,21 +24,21 @@ class _UserCoursesState extends State<UserCourses> {
   // -----------------------------
   RangeValues priceRange = const RangeValues(0, 200000);
   List<String> selectedCategories = [];
-  List<String> selectedLanguages = [];
+  List<CourseLanguage> selectedLanguages = [];
   String duration = "";
   String minRating = "0";
-  String placementType = "";
+  String? placementType;
+
   String mode = "";
   String eligibility = "";
   String language = "";
-  String batchSize = "";
-  String refundPolicy = "";
   String minOutcomes = "0";
   List<String> skills = [];
   List<dynamic> courses = [];
   List<dynamic> recommendedCourses = [];
   bool isLoading = true;
   String? errorMessage;
+  bool filtersApplied = false;
 
   // COURSE LIST
   Future<void> _loadCourses() async {
@@ -61,7 +61,8 @@ class _UserCoursesState extends State<UserCourses> {
         priceMin: priceRange.start,
         priceMax: priceRange.end,
         mode: mode,
-        language: selectedLanguages.isNotEmpty ? selectedLanguages.first : null,
+        placementAssistance: placementType,
+        language: selectedLanguages.map((e) => e.apiValue).toList(),
       );
 
       debugPrint(const JsonEncoder.withIndent('  ').convert(result));
@@ -118,14 +119,18 @@ class _UserCoursesState extends State<UserCourses> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (recommendedCourses.isNotEmpty)
+                        if (!filtersApplied && recommendedCourses.isNotEmpty)
                           _buildRecommendedSection(context),
+
                         Text(
-                          "Featured Courses",
+                          filtersApplied
+                              ? "Matching Results"
+                              : "Featured Courses",
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+
                         const SizedBox(height: 10),
                         const SizedBox(height: 20),
                         ...courses.map((c) => _buildCourseCard(context, c)),
@@ -164,7 +169,9 @@ class _UserCoursesState extends State<UserCourses> {
                     ),
                   ),
                   Text(
-                    "${courses.length} courses found",
+                    filtersApplied
+                        ? "${courses.length} matching results"
+                        : "${courses.length} courses found",
                     style: theme.textTheme.bodySmall!.copyWith(
                       color: Colors.black54,
                     ),
@@ -458,7 +465,15 @@ class _UserCoursesState extends State<UserCourses> {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: const FilterSheetTwoPane(),
+          child: FilterSheetTwoPane(
+            selectedCategories: selectedCategories,
+            selectedLanguages: selectedLanguages,
+            minPrice: priceRange.start,
+            maxPrice: priceRange.end,
+            rating: minRating,
+            modes: [mode],
+            placement: placementType ?? "Any",
+          ),
         );
       },
     );
@@ -470,6 +485,7 @@ class _UserCoursesState extends State<UserCourses> {
 
   void _applyFilters(Map<String, dynamic> filters) {
     setState(() {
+      filtersApplied = true;
       selectedCategories = filters["categories"] ?? [];
       selectedLanguages = filters["languages"] ?? [];
 
@@ -478,7 +494,7 @@ class _UserCoursesState extends State<UserCourses> {
       priceRange = RangeValues(minP, maxP);
 
       minRating = filters["rating"] ?? "0";
-
+      placementType = filters["placement"]; // will be "true" / "false" / null
       mode = filters["modes"]?.isNotEmpty == true ? filters["modes"][0] : "";
     });
 

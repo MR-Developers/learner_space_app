@@ -72,3 +72,23 @@ extension PostCategoryExtension on PostCategory {
 }
 
 // #endregion
+
+//#region Language
+enum CourseLanguage {
+  english("English", "english"),
+  hindi("Hindi", "hindi"),
+  telugu("Telugu", "telugu");
+
+  final String label; // shown in UI
+  final String apiValue;
+  const CourseLanguage(this.label, this.apiValue);
+
+  static CourseLanguage? fromLabel(String label) {
+    return CourseLanguage.values.firstWhere(
+      (e) => e.apiValue.toLowerCase() == label.toLowerCase(),
+      orElse: () => CourseLanguage.english,
+    );
+  }
+}
+
+//#endregion

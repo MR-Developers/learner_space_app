@@ -13,7 +13,7 @@ class ApiEndpoints {
 
   // POSTS
   static const String createPost = "/posts";
-  static String getAllPosts(String userId) => "/posts/$userId";
+  static String getAllPosts(String userId) => "/posts/user/$userId";
   static String updatePost(String postId) => "/posts/$postId";
   static String deletePost(String postId) => "/posts/$postId";
 

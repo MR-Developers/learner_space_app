@@ -44,8 +44,8 @@ class CourseService {
     double? priceMin,
     double? priceMax,
     String? mode,
-    String? language,
-    bool? placementAssistance,
+    List<String>? language,
+    String? placementAssistance,
     String? instructorId,
   }) async {
     try {
@@ -58,7 +58,7 @@ class CourseService {
         if (priceMax != null) 'priceMax': priceMax,
         if (mode != null) 'mode': mode,
         if (language != null) 'language': language,
-        if (placementAssistance != null)
+        if (placementAssistance != null && placementAssistance != "Any")
           'placementAssistance': placementAssistance.toString(),
         if (instructorId != null) 'instructorId': instructorId,
       };
