@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -25,6 +26,9 @@ class _UserCoursesState extends State<UserCourses> {
   RangeValues priceRange = const RangeValues(0, 200000);
   List<String> selectedCategories = [];
   List<CourseLanguage> selectedLanguages = [];
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = "";
+
   String duration = "";
   String minRating = "0";
   String? placementType;
@@ -39,6 +43,16 @@ class _UserCoursesState extends State<UserCourses> {
   bool isLoading = true;
   String? errorMessage;
   bool filtersApplied = false;
+  Timer? _debounce;
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      filtersApplied = searchQuery.isNotEmpty;
+      _loadCourses();
+    });
+  }
 
   // COURSE LIST
   Future<void> _loadCourses() async {
@@ -63,6 +77,7 @@ class _UserCoursesState extends State<UserCourses> {
         mode: mode,
         placementAssistance: placementType,
         language: selectedLanguages.map((e) => e.apiValue).toList(),
+        search: searchQuery,
       );
 
       debugPrint(const JsonEncoder.withIndent('  ').convert(result));
@@ -96,6 +111,13 @@ class _UserCoursesState extends State<UserCourses> {
   void initState() {
     super.initState();
     _loadCourses();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   @override
@@ -198,6 +220,14 @@ class _UserCoursesState extends State<UserCourses> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
+                          controller: searchController,
+                          onChanged: (value) {
+                            setState(() {
+                              searchQuery = value;
+                            });
+
+                            _onSearchChanged();
+                          },
                           decoration: const InputDecoration.collapsed(
                             hintText: "Search courses...",
                           ),

@@ -47,6 +47,7 @@ class CourseService {
     List<String>? language,
     String? placementAssistance,
     String? instructorId,
+    String? search,
   }) async {
     try {
       final queryParams = {
@@ -61,6 +62,7 @@ class CourseService {
         if (placementAssistance != null && placementAssistance != "Any")
           'placementAssistance': placementAssistance.toString(),
         if (instructorId != null) 'instructorId': instructorId,
+        if (search != null) 'search': search,
       };
 
       final response = await _dio.get(
