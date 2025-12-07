@@ -10,6 +10,7 @@ class ApiEndpoints {
       "/users/getRecommendedCourses/$userId";
   static String getRecommendedCourseByCat(String userId, String categoryId) =>
       "/users/getRecommendedCourseByCat/$userId/$categoryId";
+  static String getCourseById(String courseId) => "/users/getCourse/$courseId";
 
   // POSTS
   static const String createPost = "/posts";

@@ -77,4 +77,16 @@ class CourseService {
       throw Exception(message);
     }
   }
+
+  Future<Map<String, dynamic>> getCourseById(String courseId) async {
+    try {
+      final response = await _dio.get(ApiEndpoints.getCourseById(courseId));
+
+      return response.data;
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? "Failed to fetch course details";
+      throw Exception(message);
+    }
+  }
 }
