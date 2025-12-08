@@ -17,20 +17,31 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    debugPrint("AuthProvider: LOGIN attempt for email=$email");
+    debugPrint(
+      "AuthProvider: BASE_URL = ${const String.fromEnvironment("BASE_URL")}",
+    );
+
     try {
       await _repo.login(email, password);
+
+      debugPrint("AuthProvider: LOGIN SUCCESS for email=$email");
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Login successful!')));
 
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
+      debugPrint("AuthProvider: LOGIN ERROR -> $e");
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       _isLoading = false;
       notifyListeners();
+      debugPrint("AuthProvider: LOGIN finished");
     }
   }
 
@@ -39,20 +50,31 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    debugPrint("AuthProvider: SIGNUP attempt for email=${data.email}");
+    debugPrint(
+      "AuthProvider: BASE_URL = ${const String.fromEnvironment("BASE_URL")}",
+    );
+
     try {
       await _repo.signup(data);
+
+      debugPrint("AuthProvider: SIGNUP SUCCESS for email=${data.email}");
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account Created Successfully')),
       );
 
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
+      debugPrint("AuthProvider: SIGNUP ERROR -> $e");
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       _isLoading = false;
       notifyListeners();
+      debugPrint("AuthProvider: SIGNUP finished");
     }
   }
 
@@ -61,8 +83,15 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    debugPrint("AuthProvider: LOGOUT attempt");
+    debugPrint(
+      "AuthProvider: BASE_URL = ${const String.fromEnvironment("BASE_URL")}",
+    );
+
     try {
       await _repo.logout();
+
+      debugPrint("AuthProvider: LOGOUT SUCCESS");
 
       ScaffoldMessenger.of(
         context,
@@ -70,12 +99,15 @@ class AuthProvider extends ChangeNotifier {
 
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     } catch (e) {
+      debugPrint("AuthProvider: LOGOUT ERROR -> $e");
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       _isLoading = false;
       notifyListeners();
+      debugPrint("AuthProvider: LOGOUT finished");
     }
   }
 }

@@ -9,6 +9,8 @@ class AuthRepository {
 
   Future<void> login(String email, String password) async {
     final data = await _authService.login(email, password);
+    print("DEBUG: Login API response = $data");
+    print("DEBUG: Runtime type = ${data.runtimeType}");
 
     final accessToken = data['accessToken'];
     final refreshToken = data['refreshToken'];
