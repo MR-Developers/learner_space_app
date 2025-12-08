@@ -1,16 +1,17 @@
 class ApiEndpoints {
   // AUTH
-  static const String login = '/users/login';
-  static const String register = '/users';
+  static const String login = '/learners/login';
+  static const String register = '/learners';
 
   // COURSES
-  static const String getCourses = "/users/getCourses";
+  static const String getCourses = "/learners/getCourses";
 
   static String getRecommendedCourses(String userId) =>
-      "/users/getRecommendedCourses/$userId";
+      "/learners/getRecommendedCourses/$userId";
   static String getRecommendedCourseByCat(String userId, String categoryId) =>
-      "/users/getRecommendedCourseByCat/$userId/$categoryId";
-  static String getCourseById(String courseId) => "/users/getCourse/$courseId";
+      "/learners/getRecommendedCourseByCat/$userId/$categoryId";
+  static String getCourseById(String courseId) =>
+      "/learners/getCourse/$courseId";
 
   // POSTS
   static const String createPost = "/posts";
@@ -45,8 +46,8 @@ class ApiEndpoints {
   static String deleteComment(String commentId) => "/comments/$commentId";
 
   //CATEGORIES
-  static const String getAllCategories = "/users/getAllCategories";
+  static const String getAllCategories = "/learners/getAllCategories";
 
   static String getCompanyCategoryCount(int categoryId) =>
-      "/users/companyCategoryCount/$categoryId";
+      "/learners/companyCategoryCount/$categoryId";
 }

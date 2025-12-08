@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Utils/Formatters.dart';
 import 'package:http/http.dart' as http;
-import 'package:learner_space_app/Utils/pdfViewer.dart';
 import 'package:pdfx/pdfx.dart';
 
 class CourseDetailPage extends StatefulWidget {
@@ -167,7 +166,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       },
       'curriculum': curriculum,
       'nextBatch': raw['nextBatch'] ?? raw['next_batch'] ?? '-',
-      'raw': raw, // keep raw if you need it later
+      'raw': raw,
       'image': image,
     };
   }
@@ -922,10 +921,10 @@ class _CurriculumTabState extends State<_CurriculumTab> {
                         const SizedBox(height: 12),
                         ElevatedButton(
                           onPressed: () => _loadPdfAtIndex(_activeIndex),
-                          child: const Text('Retry'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF6B35),
                           ),
+                          child: const Text('Retry'),
                         ),
                       ],
                     ),
