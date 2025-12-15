@@ -64,8 +64,7 @@ class Post {
       description: json["description"] ?? "",
       userId: json["userId"] ?? "",
       userName:
-          "${json["userName"]["firstname"]} ${json["userName"]["lastname"]}" ??
-          "",
+          "${json["userName"]["firstname"]} ${json["userName"]["lastname"]}",
       likes: json["likes"] ?? 0,
       commentNumber: json["commentNumber"] ?? 0,
       category: PostCategoryExtension.fromInt(json["category"] ?? 0),

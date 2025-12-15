@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:learner_space_app/Screens/Learner/CourseDetails.dart';
 import 'package:learner_space_app/Screens/Learner/Referrals.dart';
 import 'package:learner_space_app/Screens/Learner/SplashScreen.dart';
+import 'package:learner_space_app/Screens/Learner/SubmitOutcomes.dart';
 import 'package:learner_space_app/Screens/Learner/UserAiChat.dart';
 import 'package:learner_space_app/Screens/Learner/UserCommunity.dart';
 import 'package:learner_space_app/Screens/Learner/UserOutcomes.dart';
@@ -87,6 +88,13 @@ class MyApp extends StatelessWidget {
           "/referrals": (context) => const ReferralsPage(),
           "/userOutcomes": (context) => const UserOutcomes(),
           "/userPostPage": (context) => const UploadPostPage(),
+          "/userSubmitOutcome": (context) {
+            final args =
+                ModalRoute.of(context)!.settings.arguments
+                    as Map<String, String>;
+
+            return SubmitOutcomePage(courseId: args['courseId']!);
+          },
         },
         //#endregion
       ),

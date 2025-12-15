@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
+import 'package:learner_space_app/Apis/Services/lead_service.dart';
+import 'package:learner_space_app/Apis/Services/outcome_service.dart';
+import 'package:learner_space_app/Apis/Services/review_service.dart';
+import 'package:learner_space_app/Data/Models/OutcomesModel.dart';
+import 'package:learner_space_app/Data/Models/ReviewModel.dart';
 import 'package:learner_space_app/Utils/Formatters.dart';
 import 'package:http/http.dart' as http;
+import 'package:learner_space_app/Utils/UserSession.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final String id;
@@ -16,6 +23,17 @@ class CourseDetailPage extends StatefulWidget {
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
   final CourseService _courseService = CourseService();
+  final OutcomeService _outcomeService = OutcomeService();
+  final ReviewService _reviewService = ReviewService();
+  final LeadService _leadService = LeadService();
+  bool _enrolling = false;
+
+  List<ReviewModel> courseReviews = [];
+  bool reviewsLoading = false;
+
+  List<OutcomeModel> courseOutcomes = [];
+
+  bool outcomesLoading = false;
 
   Map<String, dynamic>? course;
   bool isLoading = true;
@@ -25,6 +43,88 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   void initState() {
     super.initState();
     _loadCourse();
+  }
+
+  Future<void> _handleEnroll(Map<String, dynamic> course) async {
+    if (_enrolling) return;
+
+    setState(() => _enrolling = true);
+
+    try {
+      final String? userId = await UserSession.getUserId();
+      if (userId == null) {
+        throw Exception("User not logged in");
+      }
+
+      final String? courseUrl = course['raw']?['courseUrl'];
+      if (courseUrl == null || courseUrl.isEmpty) {
+        throw Exception("Course URL not available");
+      }
+
+      // 1️⃣ CREATE LEAD
+      await _leadService.createLead({
+        "clientId": userId,
+        "courseId": course['id'],
+        "companyId": course['raw']?['companyId'],
+      });
+
+      // 2️⃣ OPEN COURSE URL (EXTERNAL)
+      final Uri uri = Uri.parse(courseUrl);
+
+      if (!await canLaunchUrl(uri)) {
+        throw Exception("Could not open course link");
+      }
+
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _enrolling = false);
+    }
+  }
+
+  Future<void> _loadReviews() async {
+    try {
+      setState(() => reviewsLoading = true);
+
+      final res = await _reviewService.getReviewsByCourse(widget.id);
+
+      if (res['success'] == true && res['data'] is List) {
+        courseReviews = (res['data'] as List)
+            .map((e) => ReviewModel.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('Failed to load reviews: $e');
+    } finally {
+      if (mounted) {
+        setState(() => reviewsLoading = false);
+      }
+    }
+  }
+
+  Future<void> _loadOutcomes() async {
+    try {
+      setState(() => outcomesLoading = true);
+
+      final res = await _outcomeService.getOutcomesByCourse(widget.id);
+
+      if (res['success'] == true && res['data'] is List) {
+        courseOutcomes = (res['data'] as List)
+            .map((e) => OutcomeModel.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('Failed to load outcomes: $e');
+    } finally {
+      if (mounted) {
+        setState(() => outcomesLoading = false);
+      }
+    }
   }
 
   Future<void> _loadCourse() async {
@@ -82,6 +182,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         course = fetched;
         isLoading = false;
       });
+      await _loadOutcomes();
+      await _loadReviews();
     } catch (e, st) {
       print('Error in _loadCourse: $e\n$st');
 
@@ -94,8 +196,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   Map<String, dynamic> normalizeCourse(Map<String, dynamic> raw) {
-    final NumberFormat nf = NumberFormat.decimalPattern('en_IN');
-
     String? pickImage(dynamic images) {
       if (images == null) return null;
       if (images is String) return images;
@@ -325,13 +425,25 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               _OverviewTab(course: c),
               _CurriculumTab(pdfs: List<dynamic>.from(c['curriculum'] ?? [])),
               _OutcomesTab(
-                outcomes: Map<String, dynamic>.from(c['outcomes'] ?? {}),
+                outcomes: courseOutcomes,
+                loading: outcomesLoading,
+                courseId: c['id'],
               ),
-              _ReviewsTab(course: c),
+
+              _ReviewsTab(
+                rating: c['rating'],
+                totalReviews: c['reviews'],
+                reviews: courseReviews,
+                loading: reviewsLoading,
+              ),
             ],
           ),
         ),
-        bottomNavigationBar: _BottomCTA(price: c['price']?.toString() ?? '-'),
+        bottomNavigationBar: _BottomCTA(
+          price: c['price']?.toString() ?? '-',
+          loading: _enrolling,
+          onEnroll: () => _handleEnroll(c),
+        ),
       ),
     );
   }
@@ -481,17 +593,6 @@ class _CourseHeader extends StatelessWidget {
                 ),
               ],
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.group, size: 16, color: Colors.grey.shade700),
-                const SizedBox(width: 4),
-                Text(
-                  '${nf.format(course['students'] ?? 0)} students',
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-                ),
-              ],
-            ),
           ],
         ),
       ],
@@ -542,17 +643,8 @@ class _QuickStats extends StatelessWidget {
       children: [
         statItem(Icons.access_time, 'Duration', course['duration'] ?? '-'),
         const SizedBox(width: 8),
-        statItem(
-          Icons.trending_up,
-          'Avg Salary',
-          course['outcomes']?['avgSalary'] ?? '-',
-        ),
+        statItem(Icons.group, 'Students', "${course['students']}"),
         const SizedBox(width: 8),
-        statItem(
-          Icons.check_circle_outline,
-          'Placed',
-          '${course['outcomes']?['placed'] ?? 0}%',
-        ),
       ],
     );
   }
@@ -994,137 +1086,241 @@ class _CurriculumTabState extends State<_CurriculumTab> {
 
 /// Outcomes tab content
 class _OutcomesTab extends StatelessWidget {
-  final Map<String, dynamic> outcomes;
-  const _OutcomesTab({required this.outcomes});
+  final List<OutcomeModel> outcomes;
+
+  final bool loading;
+  final String courseId;
+
+  const _OutcomesTab({
+    required this.outcomes,
+    required this.loading,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final placed = (outcomes['placed'] as num?)?.toDouble() ?? 0.0;
-    final percent = (placed / 100).clamp(0.0, 1.0);
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return SingleChildScrollView(
+    return Column(
+      children: [
+        // ✅ ADD OUTCOME BUTTON
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  "/userSubmitOutcome",
+                  arguments: {"courseId": courseId},
+                );
+              },
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text(
+                "Add Your Outcome",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B35),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const Divider(height: 1),
+
+        // ✅ OUTCOMES LIST / EMPTY STATE
+        Expanded(
+          child: outcomes.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.insights_outlined,
+                          size: 56,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          "No outcomes available yet",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "Be the first to share your placement outcome.",
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: outcomes.length,
+                  itemBuilder: (context, index) {
+                    return _OutcomeCard(outcome: outcomes[index]);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OutcomeCard extends StatelessWidget {
+  final OutcomeModel outcome;
+
+  const _OutcomeCard({required this.outcome});
+
+  @override
+  Widget build(BuildContext context) {
+    final String userName = outcome.fullUserName;
+    final bool verified = outcome.verified;
+    final String? profilePic = outcome.userProfilePic;
+
+    final bool hasProfilePic = profilePic != null && profilePic.isNotEmpty;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Placement Success',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // 👤 USER HEADER
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: hasProfilePic
+                    ? NetworkImage(profilePic)
+                    : null,
+                child: !hasProfilePic
+                    ? Icon(Icons.person, color: Colors.grey.shade600)
+                    : null,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Students Placed',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
                     Text(
-                      '${outcomes['placed'] ?? 0}%',
+                      userName,
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "Placed Student",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: percent,
-                    minHeight: 12,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFFFF6B35),
-                    ),
+              ),
+              if (verified)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.verified,
+                        size: 14,
+                        color: Colors.green.shade700,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Verified",
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Average Salary Package',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  outcomes['avgSalary'] ?? '-',
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // 🏢 COMPANY
+          Row(
+            children: [
+              const Icon(
+                Icons.business_center,
+                size: 18,
+                color: Color(0xFFFF6B35),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  outcome.companyPlaced,
                   style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFFF6B35),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // 💰 PACKAGE
+          Text(
+            "Package: ${outcome.package}",
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+
+          const SizedBox(height: 8),
+
+          // 📝 DESCRIPTION
+          Text(
+            outcome.description,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Hiring Companies',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: (outcomes['companies'] as List<dynamic>? ?? []).map(
-                    (c) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Text(
-                          c.toString(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      );
-                    },
-                  ).toList(),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 100), // Bottom padding
         ],
       ),
     );
@@ -1133,177 +1329,191 @@ class _OutcomesTab extends StatelessWidget {
 
 /// Reviews tab content
 class _ReviewsTab extends StatelessWidget {
-  final Map<String, dynamic> course;
-  const _ReviewsTab({required this.course});
+  final int rating;
+  final int totalReviews;
+  final List<ReviewModel> reviews;
+  final bool loading;
+
+  const _ReviewsTab({
+    required this.rating,
+    required this.totalReviews,
+    required this.reviews,
+    required this.loading,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final rating = course['rating'] ?? 0;
-    final reviews = course['reviews'] ?? 0;
-    return SingleChildScrollView(
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
+      children: [
+        // ⭐ SUMMARY
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Text(
+                rating.toStringAsFixed(1),
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
                 ),
-              ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < rating.round() ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$totalReviews reviews',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // 📝 REVIEWS LIST
+        if (reviews.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text("No reviews yet"),
             ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          )
+        else
+          ...reviews.map((r) => _ReviewCard(review: r)),
+      ],
+    );
+  }
+}
+
+class _ReviewCard extends StatelessWidget {
+  final ReviewModel review;
+
+  const _ReviewCard({required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool hasProfilePic =
+        review.userProfilePic != null && review.userProfilePic!.isNotEmpty;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 👤 USER HEADER
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: hasProfilePic
+                    ? NetworkImage(review.userProfilePic!)
+                    : null,
+                child: !hasProfilePic
+                    ? Icon(Icons.person, color: Colors.grey.shade600)
+                    : null,
+              ),
+              const SizedBox(width: 10),
+
+              // NAME + DATE
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Student Reviews',
-                      style: TextStyle(
+                    Text(
+                      review.userName?.fullName ?? 'Anonymous',
+                      style: const TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 18,
+                        fontSize: 14,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                    if (review.createdAt != null)
+                      Text(
+                        DateFormat('dd MMM yyyy').format(review.createdAt!),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade50,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 18),
-                          const SizedBox(width: 4),
-                          Text(
-                            rating.toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  '$reviews verified reviews from enrolled students',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              ),
+
+              Row(
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < review.stars ? Icons.star : Icons.star_border,
+                    size: 16,
+                    color: Colors.amber,
+                  ),
                 ),
-                const SizedBox(height: 16),
-                ...List.generate(5, (index) {
-                  final star = 5 - index;
-                  final percentage = (20 - index * 3).clamp(0, 100);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 50,
-                          child: Row(
-                            children: [
-                              Text(
-                                '$star',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.star,
-                                size: 14,
-                                color: Colors.amber,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: percentage / 100,
-                              minHeight: 8,
-                              backgroundColor: Colors.grey.shade200,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.amber,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 40,
-                          child: Text(
-                            '$percentage%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            review.description,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B35),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'View All Verified Reviews',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-          const SizedBox(height: 100), // Bottom padding
         ],
       ),
     );
   }
 }
 
-/// Fixed bottom CTA with price & enroll button
 class _BottomCTA extends StatelessWidget {
   final String price;
-  const _BottomCTA({required this.price});
+  final VoidCallback onEnroll;
+  final bool loading;
+
+  const _BottomCTA({
+    required this.price,
+    required this.onEnroll,
+    required this.loading,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
       child: SafeArea(
         child: Row(
           children: [
@@ -1312,15 +1522,7 @@ class _BottomCTA extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Course Price',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+                  const Text('Course Price', style: TextStyle(fontSize: 12)),
                   Text(
                     price,
                     style: const TextStyle(
@@ -1334,20 +1536,28 @@ class _BottomCTA extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: loading ? null : onEnroll,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6B35),
-                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
                 ),
-                child: const Text(
-                  'Enroll Now',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
+                child: loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        'Enroll Now',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
               ),
             ),
           ],

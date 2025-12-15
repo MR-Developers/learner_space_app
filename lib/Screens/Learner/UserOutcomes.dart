@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learner_space_app/Apis/Services/outcome_service.dart';
 
 class UserOutcomes extends StatefulWidget {
   const UserOutcomes({super.key});
@@ -8,6 +9,11 @@ class UserOutcomes extends StatefulWidget {
   @override
   State<UserOutcomes> createState() => _UserOutcomesState();
 }
+
+final OutcomeService _outcomeService = OutcomeService();
+
+List<Map<String, dynamic>> featuredOutcomes = [];
+bool featuredLoading = false;
 
 class _UserOutcomesState extends State<UserOutcomes> {
   // Sample data (mirrors your React example)
@@ -108,12 +114,36 @@ class _UserOutcomesState extends State<UserOutcomes> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadFeaturedOutcomes();
+  }
+
+  Future<void> _loadFeaturedOutcomes() async {
+    try {
+      setState(() => featuredLoading = true);
+
+      final res = await _outcomeService.getFeaturedOutcomes();
+
+      if (res['success'] == true && res['data'] is List) {
+        featuredOutcomes = List<Map<String, dynamic>>.from(res['data']);
+      }
+    } catch (e) {
+      debugPrint("Failed to load featured outcomes: $e");
+    } finally {
+      if (mounted) {
+        setState(() => featuredLoading = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double maxSalary = _maxSalary();
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -133,7 +163,7 @@ class _UserOutcomesState extends State<UserOutcomes> {
                     const SizedBox(height: 16),
                     _companiesCard(),
                     const SizedBox(height: 16),
-                    _alumniStoriesSection(),
+                    _featuredOutcomesSection(),
                     const SizedBox(height: 30),
                   ],
                 ),
@@ -142,6 +172,158 @@ class _UserOutcomesState extends State<UserOutcomes> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _featuredOutcomesSection() {
+    if (featuredLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (featuredOutcomes.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text("No featured outcomes available"),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 2),
+          child: Text(
+            "Success Stories",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        Column(
+          children: featuredOutcomes.map((o) {
+            final user = o['userName'] ?? {};
+            final fullName =
+                "${user['firstname'] ?? ''} ${user['lastname'] ?? ''}".trim();
+
+            return Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(color: Colors.grey.shade200),
+              ),
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // USER HEADER
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundColor: Colors.grey.shade100,
+                          backgroundImage: o['userProfilePic'] != null
+                              ? NetworkImage(o['userProfilePic'])
+                              : null,
+                          child: o['userProfilePic'] == null
+                              ? const Icon(
+                                  Icons.person,
+                                  color: UserOutcomes.primary,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                fullName.isEmpty ? "Placed Student" : fullName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "${o['companyPlaced']} • ${o['courseName'] ?? ''}",
+                                style: const TextStyle(
+                                  color: UserOutcomes.primary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (o['verified'] == true)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              "Verified",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // DESCRIPTION
+                    Text(
+                      o['description'] ?? '',
+                      style: const TextStyle(height: 1.4),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // PACKAGE
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: UserOutcomes.primary.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Package",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          Text(
+                            o['package'] ?? '-',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: UserOutcomes.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -459,180 +641,6 @@ class _UserOutcomesState extends State<UserOutcomes> {
           ],
         ),
       ),
-    );
-  }
-
-  // ---------------- Alumni Stories ----------------
-  Widget _alumniStoriesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2),
-          child: Text(
-            "Success Stories",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Column(
-          children: alumniStories.map((story) {
-            return Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-                side: BorderSide(color: Colors.grey.shade200),
-              ),
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            size: 28,
-                            color: UserOutcomes.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                story['name'] as String,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                story['role'] as String,
-                                style: const TextStyle(
-                                  color: UserOutcomes.primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      story['story'] as String,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Before",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  story['beforeSalary'] as String,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: UserOutcomes.primary.withOpacity(0.06),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: UserOutcomes.primary.withOpacity(0.14),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "After",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    Text(
-                                      story['afterSalary'] as String,
-                                      style: const TextStyle(
-                                        color: UserOutcomes.primary,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: UserOutcomes.primary,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        "+${story['growth']}",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
     );
   }
 }

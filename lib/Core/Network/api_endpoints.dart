@@ -50,4 +50,35 @@ class ApiEndpoints {
 
   static String getCompanyCategoryCount(int categoryId) =>
       "/learners/companyCategoryCount/$categoryId";
+
+  //OUTCOMES
+  static const String createOutcome = "/outcomes";
+  static const String getAllOutcomes = "/outcomes";
+
+  static String getOutcomeById(String outcomeId) => "/outcomes/$outcomeId";
+
+  static String getOutcomesByUser(String userId) => "/outcomes/user/$userId";
+
+  static String getOutcomesByCourse(String courseId) =>
+      "/outcomes/course/$courseId";
+
+  static String updateOutcome(String outcomeId) => "/outcomes/$outcomeId";
+
+  static String deleteOutcome(String outcomeId) => "/outcomes/$outcomeId";
+
+  static const String getFeatureOutcomes = "/outcomes/featured";
+
+  // REVIEWS
+  static const String createReview = "/learners/reviews";
+
+  static const String getAllReviews = "/learners/reviews";
+
+  static String getReviewsByCourse(String courseId) =>
+      "/learners/reviews/course/$courseId";
+
+  static String updateReview(String reviewId) => "/learners/reviews/$reviewId";
+
+  static String deleteReview(String reviewId) => "/learners/reviews/$reviewId";
+  // LEADS
+  static const String createLead = "/leads";
 }

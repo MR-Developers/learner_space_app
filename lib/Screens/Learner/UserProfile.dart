@@ -35,11 +35,6 @@ class UserProfile extends StatelessWidget {
       route: "/saved",
     ),
     MenuItem(
-      icon: Icons.shield_outlined,
-      label: "Submit Outcome",
-      route: "/submit-outcome",
-    ),
-    MenuItem(
       icon: Icons.notifications_outlined,
       label: "Notifications",
       route: "/notifications",
