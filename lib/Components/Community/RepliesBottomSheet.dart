@@ -77,6 +77,8 @@ class _RepliesBottomSheetState extends State<RepliesBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return SafeArea(
@@ -88,8 +90,8 @@ class _RepliesBottomSheetState extends State<RepliesBottomSheet> {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.85,
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: colors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -142,6 +144,8 @@ class _RepliesBottomSheetState extends State<RepliesBottomSheet> {
   }
 
   Widget _buildReplyItem(dynamic r) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final userName = r["userName"]["firstname"] ?? "Unknown";
 
     return Row(
@@ -152,7 +156,10 @@ class _RepliesBottomSheetState extends State<RepliesBottomSheet> {
           backgroundColor: Colors.grey[300],
           child: Text(
             userName[0].toUpperCase(),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: colors.onPrimary,
+            ),
           ),
         ),
 
@@ -181,6 +188,8 @@ class _RepliesBottomSheetState extends State<RepliesBottomSheet> {
   }
 
   Widget _buildReplyInput() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
       decoration: BoxDecoration(
@@ -215,7 +224,7 @@ class _RepliesBottomSheetState extends State<RepliesBottomSheet> {
                 )
               : GestureDetector(
                   onTap: _submitReply,
-                  child: const Icon(Icons.send, color: Colors.black87),
+                  child: Icon(Icons.send, color: colors.onSurface),
                 ),
         ],
       ),

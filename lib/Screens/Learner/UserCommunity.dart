@@ -140,9 +140,9 @@ class _UserCommunityState extends State<UserCommunity>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final colors = theme.colorScheme;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Column(
           children: [

@@ -2,6 +2,7 @@ class ApiEndpoints {
   // AUTH
   static const String login = '/learners/login';
   static const String register = '/learners';
+  static const String changePassword = '/learners/change-password';
 
   // COURSES
   static const String getCourses = "/learners/getCourses";

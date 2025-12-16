@@ -119,6 +119,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.92,
       child: Row(
@@ -130,12 +132,15 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
             child: Column(
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 20,
+                  child: Container(
+                    color: colors.surface,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 20,
+                      ),
+                      child: _buildRightPanel(),
                     ),
-                    child: _buildRightPanel(),
                   ),
                 ),
 
@@ -147,8 +152,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
                       horizontal: 16,
                       vertical: 12,
                     ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: colors.surface,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black12,
@@ -204,9 +209,11 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
 
   // ---------------- LEFT MENU ----------------
   Widget _buildLeftMenu() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Container(
       width: 130,
-      color: const Color(0xFFF1F4F6),
+      color: colors.surfaceBright,
       child: ListView.builder(
         itemCount: filterSections.length,
         itemBuilder: (context, index) {
@@ -217,7 +224,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: BoxDecoration(
-                color: isActive ? Colors.white : Colors.transparent,
+                color: isActive ? colors.surface : Colors.transparent,
                 border: Border(
                   left: BorderSide(
                     color: isActive ? brandColor : Colors.transparent,
@@ -230,7 +237,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  color: isActive ? brandColor : Colors.black,
+                  color: isActive ? brandColor : colors.onSurface,
                 ),
               ),
             ),
@@ -278,11 +285,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
               cat["name"] ?? "",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
 
@@ -317,6 +320,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   }
 
   Widget _buildCheckboxWithId(String label, String id) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     bool checked = selectedCategories.contains(id);
 
     return GestureDetector(
@@ -333,7 +338,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                border: Border.all(width: 2, color: Colors.black),
+                border: Border.all(width: 2, color: colors.onSurface),
                 borderRadius: BorderRadius.circular(8),
                 color: checked ? brandColor : Colors.transparent,
               ),
@@ -357,6 +362,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
   }
 
   Widget _buildCheckboxLanguage(CourseLanguage lang) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final bool checked = selectedLanguages.contains(lang);
 
     return GestureDetector(
@@ -375,7 +382,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                border: Border.all(width: 2, color: Colors.black),
+                border: Border.all(width: 2, color: colors.onSurface),
                 borderRadius: BorderRadius.circular(8),
                 color: checked ? brandColor : Colors.transparent,
               ),
@@ -531,6 +538,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
 
   // ---------------- CHECKBOX ----------------
   Widget _buildCheckbox(String label, List<String> selectedList) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     bool checked = selectedList.contains(label);
 
     return GestureDetector(
@@ -547,7 +556,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                border: Border.all(width: 2, color: Colors.black),
+                border: Border.all(width: 2, color: colors.onSurface),
                 borderRadius: BorderRadius.circular(8),
                 color: checked ? brandColor : Colors.transparent,
               ),
@@ -570,7 +579,8 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
     Function(String) onChange,
   ) {
     bool active = label == groupValue;
-
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return GestureDetector(
       onTap: () => onChange(label),
       child: Container(
@@ -579,7 +589,7 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
           children: [
             Icon(
               active ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: active ? brandColor : Colors.black54,
+              color: active ? brandColor : colors.onSurface,
             ),
             const SizedBox(width: 12),
             Text(label, style: const TextStyle(fontSize: 16)),

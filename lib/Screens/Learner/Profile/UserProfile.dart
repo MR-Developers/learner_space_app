@@ -25,19 +25,7 @@ class UserProfile extends StatelessWidget {
     MenuItem(
       icon: Icons.book_outlined,
       label: "My Courses",
-      count: 3,
       route: "/my-courses",
-    ),
-    MenuItem(
-      icon: Icons.bookmark_outline,
-      label: "Saved Courses",
-      count: 12,
-      route: "/saved",
-    ),
-    MenuItem(
-      icon: Icons.notifications_outlined,
-      label: "Notifications",
-      route: "/notifications",
     ),
     MenuItem(
       icon: Icons.settings_outlined,
@@ -56,18 +44,7 @@ class UserProfile extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back, color: brandColor),
-          style: IconButton.styleFrom(shape: const CircleBorder()),
-        ),
-        title: const Text(
-          'Profile',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
+
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Divider(
@@ -163,7 +140,9 @@ class UserProfile extends StatelessWidget {
         side: BorderSide(color: brandColor.withOpacity(0.2)),
       ),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.pushNamed(context, item.route);
+        },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),

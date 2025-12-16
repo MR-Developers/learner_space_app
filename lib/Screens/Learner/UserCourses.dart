@@ -123,9 +123,10 @@ class _UserCoursesState extends State<UserCourses> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? colors.surface : Colors.white,
       body: Column(
         children: [
           _buildHeader(theme),
@@ -169,9 +170,12 @@ class _UserCoursesState extends State<UserCourses> {
   // HEADER WITH SEARCH + FILTERS
   // -----------------------------
   Widget _buildHeader(ThemeData theme) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: isDark ? colors.surface : Colors.white,
         border: Border(
           bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
         ),
@@ -212,11 +216,11 @@ class _UserCoursesState extends State<UserCourses> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.black12),
+                    border: Border.all(color: colors.onSurface),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: Colors.black45),
+                      const Icon(Icons.search),
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
@@ -347,6 +351,8 @@ class _UserCoursesState extends State<UserCourses> {
 
   Widget _buildCourseCard(BuildContext context, CourseModel course) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final String title = course.courseName;
     final String startup = course.companyName;
@@ -369,7 +375,9 @@ class _UserCoursesState extends State<UserCourses> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.black12),
+          border: isDark
+              ? Border.all(color: colors.outline.withOpacity(0.3))
+              : Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(26),
           color: theme.colorScheme.surface,
         ),
@@ -416,7 +424,7 @@ class _UserCoursesState extends State<UserCourses> {
                   Text(
                     startup,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.black54,
+                      color: colors.onSurface,
                     ),
                   ),
 
@@ -430,17 +438,11 @@ class _UserCoursesState extends State<UserCourses> {
                         "$rating",
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      Text(
-                        " ($reviews)",
-                        style: const TextStyle(color: Colors.black54),
-                      ),
+                      Text(" ($reviews)", style: const TextStyle()),
                       const SizedBox(width: 16),
                       const Icon(LucideIcons.users, size: 14),
                       const SizedBox(width: 4),
-                      Text(
-                        "$students",
-                        style: const TextStyle(color: Colors.black87),
-                      ),
+                      Text("$students", style: const TextStyle()),
                     ],
                   ),
 
@@ -454,7 +456,7 @@ class _UserCoursesState extends State<UserCourses> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black12,
+                          color: colors.onSurface.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: Text(

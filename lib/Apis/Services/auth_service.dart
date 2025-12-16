@@ -35,4 +35,22 @@ class AuthService {
       throw Exception(message);
     }
   }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _dio.post(
+        ApiEndpoints.changePassword,
+        data: {"currentPassword": currentPassword, "newPassword": newPassword},
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? 'Failed to change password';
+      throw Exception(message);
+    }
+  }
 }

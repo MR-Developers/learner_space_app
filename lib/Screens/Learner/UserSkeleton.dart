@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:learner_space_app/Screens/Learner/UserCommunity.dart';
 import 'package:learner_space_app/Screens/Learner/UserCourses.dart';
 import 'package:learner_space_app/Screens/Learner/UserHome.dart';
-import 'package:learner_space_app/Screens/Learner/UserProfile.dart';
+import 'package:learner_space_app/Screens/Learner/Profile/UserProfile.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class UserSkeleton extends StatefulWidget {
@@ -57,12 +57,15 @@ class _UserSkeletonState extends State<UserSkeleton>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
+        top: false,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           transitionBuilder: (Widget child, Animation<double> animation) {
@@ -134,10 +137,13 @@ class _UserSkeletonState extends State<UserSkeleton>
   }
 
   Widget _buildBottomNavBar() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colors.surface : Colors.white,
         boxShadow: const [
           BoxShadow(
             color: Color(0x33000000),

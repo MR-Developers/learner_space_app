@@ -61,24 +61,18 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         throw Exception("Course URL not available");
       }
 
-      // 1️⃣ CREATE LEAD
-      await _leadService.createLead({
-        "clientId": userId,
-        "courseId": course['id'],
-        "companyId": course['raw']?['companyId'],
-      });
-
-      // 2️⃣ OPEN COURSE URL (EXTERNAL)
+      try {
+        await _leadService.createLead({
+          "clientId": userId,
+          "courseId": course['id'],
+          "companyId": course['raw']?['companyId'],
+        });
+      } catch (_) {}
       final Uri uri = Uri.parse(courseUrl);
 
-      if (!await canLaunchUrl(uri)) {
-        throw Exception("Could not open course link");
-      }
-
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
+    } catch (e, s) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       );
@@ -273,14 +267,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: isDark ? colors.surface : Colors.grey.shade50,
           elevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            icon: Icon(Icons.arrow_back, color: colors.onSurface),
           ),
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -290,11 +287,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     if (error != null) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: colors.surface,
           elevation: 0,
           leading: IconButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            icon: Icon(Icons.arrow_back, color: colors.onSurface),
           ),
         ),
         body: Center(
@@ -343,10 +340,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 floating: true,
                 pinned: true,
                 elevation: 0,
-                backgroundColor: Colors.white,
+                backgroundColor: isDark ? colors.surface : Colors.grey.shade50,
                 leading: IconButton(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  icon: Icon(Icons.arrow_back, color: colors.onSurface),
                 ),
                 actions: [
                   IconButton(
@@ -377,7 +374,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               // Course Header
               SliverToBoxAdapter(
                 child: Container(
-                  color: Colors.white,
+                  color: isDark ? colors.surface : Colors.grey.shade50,
                   padding: const EdgeInsets.all(16),
                   child: _CourseHeader(course: c),
                 ),
@@ -386,7 +383,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               // Quick Stats
               SliverToBoxAdapter(
                 child: Container(
-                  color: Colors.white,
+                  color: isDark ? colors.surface : Colors.grey.shade50,
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: _QuickStats(course: c),
                 ),
@@ -420,23 +417,28 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               ),
             ];
           },
-          body: TabBarView(
-            children: [
-              _OverviewTab(course: c),
-              _CurriculumTab(pdfs: List<dynamic>.from(c['curriculum'] ?? [])),
-              _OutcomesTab(
-                outcomes: courseOutcomes,
-                loading: outcomesLoading,
-                courseId: c['id'],
-              ),
+          body: Container(
+            decoration: BoxDecoration(
+              color: isDark ? colors.surface : Colors.grey.shade50,
+            ),
+            child: TabBarView(
+              children: [
+                _OverviewTab(course: c),
+                _CurriculumTab(pdfs: List<dynamic>.from(c['curriculum'] ?? [])),
+                _OutcomesTab(
+                  outcomes: courseOutcomes,
+                  loading: outcomesLoading,
+                  courseId: c['id'],
+                ),
 
-              _ReviewsTab(
-                rating: c['rating'],
-                totalReviews: c['reviews'],
-                reviews: courseReviews,
-                loading: reviewsLoading,
-              ),
-            ],
+                _ReviewsTab(
+                  rating: c['rating'],
+                  totalReviews: c['reviews'],
+                  reviews: courseReviews,
+                  loading: reviewsLoading,
+                ),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: _BottomCTA(
@@ -463,7 +465,13 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: Colors.white, child: tabBar);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      color: isDark ? colors.surface : Colors.grey.shade50,
+      child: tabBar,
+    );
   }
 
   @override
@@ -607,13 +615,23 @@ class _QuickStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Widget statItem(IconData icon, String label, String value) {
+      final theme = Theme.of(context);
+      final colors = theme.colorScheme;
+      final isDark = theme.brightness == Brightness.dark;
+
       return Expanded(
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: isDark ? colors.surface : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(12),
+            border: isDark
+                ? Border.all(color: colors.outline.withOpacity(0.4))
+                : null,
           ),
           child: Column(
             children: [
@@ -621,7 +639,12 @@ class _QuickStats extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                style: TextStyle(
+                  color: isDark
+                      ? colors.onSurface.withOpacity(0.7)
+                      : Colors.grey.shade600,
+                  fontSize: 11,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
@@ -657,6 +680,8 @@ class _OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -695,7 +720,7 @@ class _OverviewTab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.surface,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -844,6 +869,8 @@ class _CurriculumTabState extends State<_CurriculumTab> {
   }
 
   Widget _buildSelector() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final urls = _pdfUrls;
     if (urls.length <= 1) return const SizedBox.shrink();
 
@@ -864,7 +891,7 @@ class _CurriculumTabState extends State<_CurriculumTab> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFFFF6B35) : Colors.white,
+                color: selected ? const Color(0xFFFF6B35) : colors.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.grey.shade300),
                 boxShadow: selected
@@ -1188,6 +1215,8 @@ class _OutcomeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final String userName = outcome.fullUserName;
     final bool verified = outcome.verified;
     final String? profilePic = outcome.userProfilePic;
@@ -1198,7 +1227,7 @@ class _OutcomeCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1343,6 +1372,8 @@ class _ReviewsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     if (loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -1354,7 +1385,7 @@ class _ReviewsTab extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -1410,6 +1441,8 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final bool hasProfilePic =
         review.userProfilePic != null && review.userProfilePic!.isNotEmpty;
 
@@ -1417,7 +1450,7 @@ class _ReviewCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1512,7 +1545,10 @@ class _BottomCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Container(
+      decoration: BoxDecoration(color: colors.surface),
       padding: const EdgeInsets.all(16),
       child: SafeArea(
         child: Row(

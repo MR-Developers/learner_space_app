@@ -3,11 +3,10 @@ allprojects {
         google()
         mavenCentral()
     }
-
     configurations.all {
         resolutionStrategy {
-            force("androidx.core:core:1.12.0")
-            force("androidx.core:core-ktx:1.12.0")
+            force("androidx.core:core:1.13.1")
+            force("androidx.core:core-ktx:1.13.1")
             force("androidx.browser:browser:1.8.0")
         }
     }

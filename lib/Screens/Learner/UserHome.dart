@@ -46,10 +46,12 @@ class _UserHomeState extends State<UserHome> {
   };
 
   void _openFilterSheet() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       useSafeArea: true,
       builder: (context) {
         return Padding(
@@ -213,9 +215,13 @@ class _UserHomeState extends State<UserHome> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     // Use a column with an Expanded ListView for the course list so the page scrolls correctly
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: isDark ? colors.surface : Colors.white,
+
       body: SafeArea(
         child: Column(
           children: [
@@ -262,25 +268,32 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildHeader() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-      ),
+      decoration: BoxDecoration(color: isDark ? colors.surface : Colors.white),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Learner Space",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: colors.onSurface,
+                ),
               ),
               Text(
                 "Find your perfect course",
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                style: TextStyle(
+                  color: colors.onSurface.withOpacity(0.6),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -302,14 +315,24 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _headerIcon(IconData icon) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: const BoxDecoration(shape: BoxShape.circle),
-      child: Icon(icon, size: 22),
+      child: Icon(
+        icon,
+        size: 22,
+        color: isDark ? colors.surface : Colors.white,
+      ),
     );
   }
 
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Stack(
@@ -317,14 +340,14 @@ class _UserHomeState extends State<UserHome> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: "Search courses, skills, careers...",
               filled: true,
-              fillColor: Colors.white,
-              prefixIcon: const Icon(LucideIcons.search),
-              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              fillColor: isDark ? colors.surface : Colors.white,
+              hintStyle: TextStyle(color: colors.onSurface.withOpacity(0.5)),
+              prefixIcon: Icon(LucideIcons.search, color: colors.onSurface),
+              hint: Text("Search For Courses"),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: colors.outline),
               ),
             ),
           ),
@@ -347,6 +370,8 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildPremiumReferralBanner() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GestureDetector(
@@ -374,11 +399,7 @@ class _UserHomeState extends State<UserHome> {
                   color: brandColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  LucideIcons.crown,
-                  color: Colors.white,
-                  size: 26,
-                ),
+                child: Icon(LucideIcons.crown, color: colors.surface, size: 26),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -410,6 +431,9 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildCategoryChips() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return SizedBox(
       height: 44,
       child: ListView(
@@ -424,10 +448,11 @@ class _UserHomeState extends State<UserHome> {
               label: Text("${c['name']} (${c['count']})"),
               selected: active,
               selectedColor: brandColor,
-              backgroundColor: Colors.white,
+              backgroundColor: isDark ? colors.surface : Colors.white,
               showCheckmark: false,
+              side: BorderSide(color: colors.outline),
               labelStyle: TextStyle(
-                color: active ? Colors.white : Colors.black,
+                color: active ? colors.onPrimary : colors.onSurface,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -446,6 +471,8 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildStatsCard() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -459,7 +486,7 @@ class _UserHomeState extends State<UserHome> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -485,7 +512,7 @@ class _UserHomeState extends State<UserHome> {
             Icon(
               LucideIcons.trendingUp,
               size: 60,
-              color: Colors.white.withOpacity(0.3),
+              color: colors.onSurface.withOpacity(0.3),
             ),
           ],
         ),
@@ -514,10 +541,13 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _quickCard(String title, IconData icon) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colors.surface : Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: Colors.grey.shade300),
       ),
@@ -588,7 +618,11 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _courseCard(CourseModel course) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     final imageUrl = course.courseImage.isNotEmpty ? course.courseImage[0] : "";
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, "/courseDetails", arguments: course.id);
@@ -597,9 +631,11 @@ class _UserHomeState extends State<UserHome> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? colors.surface : Colors.white,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.grey.shade300),
+          border: isDark
+              ? Border.all(color: colors.outline.withOpacity(0.3))
+              : Border.all(color: Colors.grey.shade300),
         ),
         child: Row(
           children: [
@@ -649,7 +685,7 @@ class _UserHomeState extends State<UserHome> {
                   const SizedBox(height: 6),
                   Text(
                     course.companyName,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    style: TextStyle(color: colors.onSurface, fontSize: 12),
                   ),
 
                   const SizedBox(height: 10),
@@ -686,23 +722,26 @@ class _UserHomeState extends State<UserHome> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(16),
+                          color: colors.onSurface.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(50),
                         ),
                         child: Text(
                           "${course.duration.value} ${course.duration.unit.label}",
-                          style: const TextStyle(fontSize: 11),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: colors.onSurface,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         "₹${course.price}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: brandColor,
                         ),

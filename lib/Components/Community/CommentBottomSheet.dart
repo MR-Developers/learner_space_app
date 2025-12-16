@@ -82,6 +82,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return SafeArea(
@@ -93,8 +95,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.85,
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: colors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -145,6 +147,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
   }
 
   Widget _buildCommentItem(dynamic c) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final userName = c["userName"]["firstname"] ?? "Unknown";
 
     return Row(
@@ -155,7 +159,10 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
           backgroundColor: Colors.grey[300],
           child: Text(
             userName[0].toUpperCase(),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: colors.onSecondary,
+            ),
           ),
         ),
 
@@ -188,6 +195,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
   }
 
   Widget _buildCommentInput() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
       decoration: BoxDecoration(
@@ -224,7 +233,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 )
               : GestureDetector(
                   onTap: _submitComment,
-                  child: const Icon(Icons.send, color: Colors.black87),
+                  child: Icon(Icons.send, color: colors.onSurface),
                 ),
         ],
       ),
