@@ -16,7 +16,9 @@ class CategoryService {
     }
   }
 
-  Future<Map<String, dynamic>> getCompanyCategoryCount(int categoryId) async {
+  Future<Map<String, dynamic>> getCompanyCategoryCount(
+    String categoryId,
+  ) async {
     try {
       final response = await _dio.get(
         ApiEndpoints.getCompanyCategoryCount(categoryId),

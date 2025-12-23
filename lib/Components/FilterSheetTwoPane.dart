@@ -278,44 +278,62 @@ class _FilterSheetTwoPaneState extends State<FilterSheetTwoPane> {
     }
 
     return ListView(
-      children: [
-        for (var cat in categories) ...[
-          // Main Category Heading
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              cat["name"] ?? "",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
+      children: categories
+          .where((cat) {
+            final subs = cat["courseCategories"];
+            return subs is List && subs.isNotEmpty;
+          })
+          .map<Widget>((cat) {
+            final List subs = cat["courseCategories"];
 
-          const SizedBox(height: 8),
-
-          // ⭐ Dynamic wrapping subcategories
-          if (cat["courseCategories"] != null)
-            Wrap(
-              spacing: 16,
-              runSpacing: 12,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (var sub in cat["courseCategories"])
-                  IntrinsicWidth(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: 120, // Minimum block width
-                        maxWidth: 180, // Max width so multiple can fit
-                      ),
-                      child: _buildCheckboxWithId(
-                        sub["name"],
-                        sub["CourseCategoryId"],
-                      ),
+                // ✅ CATEGORY HEADING (shown only if subs exist)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    cat["name"] ?? "",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-              ],
-            ),
+                ),
 
-          const SizedBox(height: 20),
-        ],
-      ],
+                const SizedBox(height: 8),
+
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 12,
+                  children: subs
+                      .where(
+                        (sub) =>
+                            sub["name"] != null &&
+                            sub["CourseCategoryId"] != null,
+                      )
+                      .map<Widget>((sub) {
+                        return IntrinsicWidth(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              minWidth: 120,
+                              maxWidth: 180,
+                            ),
+                            child: _buildCheckboxWithId(
+                              sub["name"],
+                              sub["CourseCategoryId"],
+                            ),
+                          ),
+                        );
+                      })
+                      .toList(),
+                ),
+
+                const SizedBox(height: 20),
+              ],
+            );
+          })
+          .toList(),
     );
   }
 

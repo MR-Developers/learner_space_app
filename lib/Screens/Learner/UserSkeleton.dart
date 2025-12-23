@@ -65,7 +65,6 @@ class _UserSkeletonState extends State<UserSkeleton>
       backgroundColor: Colors.grey.shade50,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        top: false,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           transitionBuilder: (Widget child, Animation<double> animation) {

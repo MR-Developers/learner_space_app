@@ -37,12 +37,12 @@ class _UserHomeState extends State<UserHome> {
   bool isLoading = true;
   String? errorMessage;
 
-  final Map<String, int?> categoryMap = {
+  final Map<String, String?> categoryMap = {
     "All": null,
-    "Tech": 0,
-    "Business": 1,
-    "Design": 2,
-    "Marketing": 3,
+    "Tech": "691d55860ee6d391a4ea3dbc",
+    "Business": "691d78767a95265ac6e1738e",
+    "Design": "693807771c8c3f4b2941f01b",
+    "Marketing": "693807f78ddbc41d9d461951",
   };
 
   void _openFilterSheet() {

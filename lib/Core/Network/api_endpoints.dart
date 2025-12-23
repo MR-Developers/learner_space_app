@@ -49,7 +49,7 @@ class ApiEndpoints {
   //CATEGORIES
   static const String getAllCategories = "/learners/getAllCategories";
 
-  static String getCompanyCategoryCount(int categoryId) =>
+  static String getCompanyCategoryCount(String categoryId) =>
       "/learners/companyCategoryCount/$categoryId";
 
   //OUTCOMES
