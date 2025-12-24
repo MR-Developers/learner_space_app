@@ -5,6 +5,7 @@ import 'package:learner_space_app/Screens/Learner/HelpAndSupport/FAQ.dart';
 import 'package:learner_space_app/Screens/Learner/Profile/HelpAndSupport.dart';
 import 'package:learner_space_app/Screens/Learner/Profile/UserSettings.dart';
 import 'package:learner_space_app/Screens/Learner/Referrals.dart';
+import 'package:learner_space_app/Screens/Learner/SearchPage.dart';
 import 'package:learner_space_app/Screens/Learner/Settings/AppPreferences.dart';
 import 'package:learner_space_app/Screens/Learner/Settings/PrivacyAndSecurity.dart';
 import 'package:learner_space_app/Screens/Learner/SplashScreen.dart';
@@ -120,6 +121,7 @@ class MyApp extends StatelessWidget {
         "/settings/preferences": (context) => const AppPreferencesPage(),
         "/settings/privacy-security": (context) =>
             const PrivacyAndSecurityPage(),
+        "/search": (context) => SearchPage(),
       },
     );
   }

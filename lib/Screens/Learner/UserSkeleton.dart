@@ -91,10 +91,10 @@ class _UserSkeletonState extends State<UserSkeleton>
           ),
         ),
       ),
-      floatingActionButton: isKeyboardOpen ? null : _buildFloatingChatButton(),
 
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // floatingActionButton: isKeyboardOpen ? null : _buildFloatingChatButton(),
 
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         height: isKeyboardOpen ? 0 : null,

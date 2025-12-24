@@ -3,11 +3,34 @@ import 'package:learner_space_app/State/auth_provider.dart';
 import 'package:learner_space_app/State/theme_provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
   static const Color brandColor = Color(0xFFEF7C08);
+
+  String _version = '';
+  String _buildNumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppVersion();
+  }
+
+  Future<void> _loadAppVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = info.version;
+      _buildNumber = info.buildNumber;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,17 +63,13 @@ class SettingsPage extends StatelessWidget {
           SettingsTile(
             icon: LucideIcons.lock,
             title: "Privacy & Security",
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, "/settings/privacy-security");
+            },
           ),
 
           const SizedBox(height: 24),
           _sectionTitle("Preferences"),
-
-          SettingsTile(
-            icon: LucideIcons.bell,
-            title: "Notifications",
-            onTap: () {},
-          ),
           SettingsTile(
             icon: LucideIcons.sliders,
             title: "App Preferences",
@@ -68,9 +87,20 @@ class SettingsPage extends StatelessWidget {
               showAboutDialog(
                 context: context,
                 applicationName: "Learner Space",
-                applicationVersion: "1.0.0",
+                applicationVersion: "Version $_version ($_buildNumber)",
               );
             },
+          ),
+
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              _version.isEmpty ? '' : 'Version $_version ($_buildNumber)',
+              style: TextStyle(
+                fontSize: 13,
+                color: brandColor.withOpacity(0.6),
+              ),
+            ),
           ),
         ],
       ),

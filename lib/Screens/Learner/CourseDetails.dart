@@ -357,17 +357,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       color: Colors.black87,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Added to favorites')),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.favorite_border,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     ScaffoldMessenger.of(context).showSnackBar(
+                  //       const SnackBar(content: Text('Added to favorites')),
+                  //     );
+                  //   },
+                  //   icon: const Icon(
+                  //     Icons.favorite_border,
+                  //     color: Colors.black87,
+                  //   ),
+                  // ),
                 ],
               ),
 

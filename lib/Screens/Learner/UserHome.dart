@@ -333,38 +333,41 @@ class _UserHomeState extends State<UserHome> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Stack(
-        children: [
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: isDark ? colors.surface : Colors.white,
-              hintStyle: TextStyle(color: colors.onSurface.withOpacity(0.5)),
-              prefixIcon: Icon(LucideIcons.search, color: colors.onSurface),
-              hint: Text("Search For Courses"),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: colors.outline),
-              ),
-            ),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, "/search");
+        },
+        child: Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: isDark ? colors.surface : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: colors.outline),
           ),
-          Positioned(
-            right: 6,
-            top: 6,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            children: [
+              Icon(LucideIcons.search, color: colors.onSurface),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Search for courses",
+                  style: TextStyle(
+                    color: colors.onSurface.withOpacity(0.5),
+                    fontSize: 14,
+                  ),
+                ),
               ),
-              child: IconButton(
-                onPressed: _openFilterSheet,
-                icon: const Icon(LucideIcons.filter),
+              Icon(
+                LucideIcons.filter,
+                color: colors.onSurface.withOpacity(0.7),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
