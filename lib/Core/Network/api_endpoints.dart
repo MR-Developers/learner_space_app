@@ -84,4 +84,33 @@ class ApiEndpoints {
   static String deleteReview(String reviewId) => "/learners/reviews/$reviewId";
   // LEADS
   static const String createLead = "/leads";
+
+  // FCM
+
+  /// Get user's FCM info
+  static String getUserFcm(String userId) => "/fcm/$userId";
+
+  /// Create FCM entry (first install / signup)
+  static const String createFcm = "/fcm";
+
+  /// Upsert FCM token (login / app open)
+  static String upsertFcmToken(String userId) => "/fcm/$userId/token";
+
+  /// Remove FCM token (logout)
+  static String removeFcmToken(String userId) => "/fcm/$userId/token/remove";
+
+  /// Update notification settings
+  static String updateFcmSettings(String userId) => "/fcm/$userId/settings";
+
+  /// Add user to notification groups
+  static String addFcmGroups(String userId) => "/fcm/$userId/groups/add";
+
+  /// Remove user from notification groups
+  static String removeFcmGroups(String userId) => "/fcm/$userId/groups/remove";
+
+  /// Disable notifications
+  static String disableNotifications(String userId) => "/fcm/$userId/disable";
+
+  /// Enable notifications
+  static String enableNotifications(String userId) => "/fcm/$userId/enable";
 }
