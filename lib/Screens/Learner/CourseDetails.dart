@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
@@ -6,6 +7,7 @@ import 'package:learner_space_app/Apis/Services/outcome_service.dart';
 import 'package:learner_space_app/Apis/Services/review_service.dart';
 import 'package:learner_space_app/Data/Models/OutcomesModel.dart';
 import 'package:learner_space_app/Data/Models/ReviewModel.dart';
+import 'package:learner_space_app/Utils/CacheManager.dart';
 import 'package:learner_space_app/Utils/Formatters.dart';
 import 'package:http/http.dart' as http;
 import 'package:learner_space_app/Utils/UserSession.dart';
@@ -701,70 +703,70 @@ class _OverviewTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFFFF6B35).withOpacity(0.1),
-                  const Color(0xFFFF6B35).withOpacity(0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFFFF6B35).withOpacity(0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.calendar_today,
-                    size: 24,
-                    color: Color(0xFFFF6B35),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Next Batch',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        course['nextBatch'] ?? '-',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Limited seats available',
-                        style: TextStyle(
-                          color: Colors.red.shade700,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.all(16),
+          //   decoration: BoxDecoration(
+          //     gradient: LinearGradient(
+          //       colors: [
+          //         const Color(0xFFFF6B35).withOpacity(0.1),
+          //         const Color(0xFFFF6B35).withOpacity(0.05),
+          //       ],
+          //     ),
+          //     borderRadius: BorderRadius.circular(16),
+          //     border: Border.all(
+          //       color: const Color(0xFFFF6B35).withOpacity(0.3),
+          //     ),
+          //   ),
+          //   child: Row(
+          //     children: [
+          //       Container(
+          //         padding: const EdgeInsets.all(12),
+          //         decoration: BoxDecoration(
+          //           color: colors.surface,
+          //           borderRadius: BorderRadius.circular(12),
+          //         ),
+          //         child: const Icon(
+          //           Icons.calendar_today,
+          //           size: 24,
+          //           color: Color(0xFFFF6B35),
+          //         ),
+          //       ),
+          //       const SizedBox(width: 16),
+          //       Expanded(
+          //         child: Column(
+          //           crossAxisAlignment: CrossAxisAlignment.start,
+          //           children: [
+          //             const Text(
+          //               'Next Batch',
+          //               style: TextStyle(
+          //                 fontSize: 12,
+          //                 color: Colors.black54,
+          //                 fontWeight: FontWeight.w500,
+          //               ),
+          //             ),
+          //             const SizedBox(height: 4),
+          //             Text(
+          //               course['nextBatch'] ?? '-',
+          //               style: const TextStyle(
+          //                 fontWeight: FontWeight.w700,
+          //                 fontSize: 16,
+          //               ),
+          //             ),
+          //             const SizedBox(height: 4),
+          //             Text(
+          //               'Limited seats available',
+          //               style: TextStyle(
+          //                 color: Colors.red.shade700,
+          //                 fontSize: 12,
+          //                 fontWeight: FontWeight.w600,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           const SizedBox(height: 100), // Bottom padding
         ],
       ),
@@ -1247,12 +1249,16 @@ class _OutcomeCard extends StatelessWidget {
                 radius: 20,
                 backgroundColor: Colors.grey.shade200,
                 backgroundImage: hasProfilePic
-                    ? NetworkImage(profilePic)
+                    ? CachedNetworkImageProvider(
+                        profilePic,
+                        cacheManager: MyCacheManager(),
+                      )
                     : null,
                 child: !hasProfilePic
                     ? Icon(Icons.person, color: Colors.grey.shade600)
                     : null,
               ),
+
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -1471,12 +1477,16 @@ class _ReviewCard extends StatelessWidget {
                 radius: 20,
                 backgroundColor: Colors.grey.shade200,
                 backgroundImage: hasProfilePic
-                    ? NetworkImage(review.userProfilePic!)
+                    ? CachedNetworkImageProvider(
+                        review.userProfilePic!,
+                        cacheManager: MyCacheManager(),
+                      )
                     : null,
                 child: !hasProfilePic
                     ? Icon(Icons.person, color: Colors.grey.shade600)
                     : null,
               ),
+
               const SizedBox(width: 10),
 
               // NAME + DATE

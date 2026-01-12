@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Services/categories_service.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
 import 'package:learner_space_app/Data/Models/CourseModel.dart';
 import 'package:learner_space_app/Data/Enums/Enums.dart';
+import 'package:learner_space_app/Utils/CourseCacheManager.dart';
 import 'package:learner_space_app/Utils/UserSession.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -645,8 +647,9 @@ class _UserHomeState extends State<UserHome> {
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: imageUrl.isNotEmpty
-                  ? Image.network(
-                      imageUrl,
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      cacheManager: CourseCacheManager(),
                       width: 72,
                       height: 72,
                       fit: BoxFit.cover,

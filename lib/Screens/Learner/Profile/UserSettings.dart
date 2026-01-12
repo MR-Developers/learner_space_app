@@ -59,7 +59,13 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(16),
         children: [
           _sectionTitle("Account"),
-          SettingsTile(icon: LucideIcons.user, title: "Profile", onTap: () {}),
+          SettingsTile(
+            icon: LucideIcons.user,
+            title: "Profile",
+            onTap: () {
+              Navigator.pushNamed(context, "/editProfile");
+            },
+          ),
           SettingsTile(
             icon: LucideIcons.lock,
             title: "Privacy & Security",

@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Services/outcome_service.dart';
+import 'package:learner_space_app/Utils/CacheManager.dart';
 
 class UserOutcomes extends StatefulWidget {
   const UserOutcomes({super.key});
@@ -226,7 +228,10 @@ class _UserOutcomesState extends State<UserOutcomes> {
                           radius: 28,
                           backgroundColor: Colors.grey.shade100,
                           backgroundImage: o['userProfilePic'] != null
-                              ? NetworkImage(o['userProfilePic'])
+                              ? CachedNetworkImageProvider(
+                                  o['userProfilePic'],
+                                  cacheManager: MyCacheManager(),
+                                )
                               : null,
                           child: o['userProfilePic'] == null
                               ? const Icon(
@@ -235,6 +240,7 @@ class _UserOutcomesState extends State<UserOutcomes> {
                                 )
                               : null,
                         ),
+
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(

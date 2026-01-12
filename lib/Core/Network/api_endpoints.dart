@@ -6,7 +6,9 @@ class ApiEndpoints {
 
   // COURSES
   static const String getCourses = "/learners/getCourses";
-
+  static String getUserInfo(String userId) => "/learners/getUserInfo/$userId";
+  static String updateUserInfo(String userId) =>
+      "/learners/updateProfile/$userId";
   static String getRecommendedCourses(String userId) =>
       "/learners/getRecommendedCourses/$userId";
   static String getRecommendedCourseByCat(String userId, String categoryId) =>

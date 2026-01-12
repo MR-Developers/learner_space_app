@@ -26,6 +26,10 @@ dependencies:
   url_launcher: 6.1.14
   shared_preferences: ^2.5.4
   package_info_plus: ^9.0.0
+  cached_network_image: ^3.4.1
+  firebase_messaging: ^16.1.0
+  flutter_local_notifications: ^19.5.0
+  firebase_core: ^4.3.0
 
 # -----------------------------
 # 🚀 App Icon Configuration

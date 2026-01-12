@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Services/course_service.dart';
 import 'package:learner_space_app/Components/FilterSheetTwoPane.dart';
 import 'package:learner_space_app/Data/Enums/Enums.dart';
 import 'package:learner_space_app/Data/Models/CourseModel.dart';
+import 'package:learner_space_app/Utils/CacheManager.dart';
+import 'package:learner_space_app/Utils/CourseCacheManager.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class SearchPage extends StatefulWidget {
@@ -353,8 +356,9 @@ Widget _buildCourseCard(
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: imageUrl.isNotEmpty
-                ? Image.network(
-                    imageUrl,
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    cacheManager: CourseCacheManager(),
                     width: 70,
                     height: 70,
                     fit: BoxFit.cover,
