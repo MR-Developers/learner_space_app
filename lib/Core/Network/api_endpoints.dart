@@ -113,4 +113,22 @@ class ApiEndpoints {
 
   /// Enable notifications
   static String enableNotifications(String userId) => "/fcm/$userId/enable";
+
+  // ================= PREFERENCES =================
+
+  /// Get user preferences
+  static String getUserPreferences(String userId) =>
+      "/learners/preferences/$userId";
+
+  /// Create preferences (first time)
+  static String createUserPreferences(String userId) =>
+      "/learners/preferences/$userId";
+
+  /// Update preferences
+  static String updateUserPreferences(String userId) =>
+      "/learners/preferences/$userId";
+
+  /// Reset preferences to default
+  static String resetUserPreferences(String userId) =>
+      "/learners/preferences/$userId/reset";
 }

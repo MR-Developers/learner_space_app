@@ -11,11 +11,12 @@ class AppPreferencesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: isDark ? colors.surface : Colors.white,
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: isDark ? colors.surface : Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

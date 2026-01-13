@@ -10,11 +10,11 @@ class PrivacyAndSecurityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: colors.surface,
+      backgroundColor: isDark ? colors.surface : Colors.white,
       appBar: AppBar(
-        backgroundColor: colors.surface,
+        backgroundColor: isDark ? colors.surface : Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

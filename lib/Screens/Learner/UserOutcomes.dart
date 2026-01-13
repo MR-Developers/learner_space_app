@@ -141,11 +141,12 @@ class _UserOutcomesState extends State<UserOutcomes> {
 
   @override
   Widget build(BuildContext context) {
-    final double maxSalary = _maxSalary();
+    // final double maxSalary = _maxSalary();
     final theme = Theme.of(context);
-
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: isDark ? colors.surface : Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -159,12 +160,12 @@ class _UserOutcomesState extends State<UserOutcomes> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _salaryCard(maxSalary),
-                    const SizedBox(height: 16),
-                    _offerLettersSection(),
-                    const SizedBox(height: 16),
-                    _companiesCard(),
-                    const SizedBox(height: 16),
+                    // _salaryCard(maxSalary),
+                    // const SizedBox(height: 16),
+                    // _offerLettersSection(),
+                    // const SizedBox(height: 16),
+                    // _companiesCard(),
+                    // const SizedBox(height: 16),
                     _featuredOutcomesSection(),
                     const SizedBox(height: 30),
                   ],
@@ -178,6 +179,9 @@ class _UserOutcomesState extends State<UserOutcomes> {
   }
 
   Widget _featuredOutcomesSection() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     if (featuredLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -211,6 +215,7 @@ class _UserOutcomesState extends State<UserOutcomes> {
 
             return Card(
               elevation: 0,
+              color: isDark ? colors.surface : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: BorderSide(color: Colors.grey.shade200),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:learner_space_app/Apis/Repository/auth_repository.dart';
+import 'package:learner_space_app/Apis/Services/preferences_service.dart';
 import 'package:learner_space_app/Data/Models/UserModel.dart';
+import 'package:learner_space_app/Utils/UserSession.dart';
 
 class AuthProvider extends ChangeNotifier {
+  final PreferencesService _preferencesService = PreferencesService();
+
   final _repo = AuthRepository();
 
   bool _isLoading = false;
@@ -31,7 +35,7 @@ class AuthProvider extends ChangeNotifier {
         context,
       ).showSnackBar(const SnackBar(content: Text('Login successful!')));
 
-      Navigator.pushReplacementNamed(context, '/home');
+      await _handlePostAuthNavigation(context);
     } catch (e) {
       debugPrint("AuthProvider: LOGIN ERROR -> $e");
 
@@ -64,7 +68,7 @@ class AuthProvider extends ChangeNotifier {
         const SnackBar(content: Text('Account Created Successfully')),
       );
 
-      Navigator.pushReplacementNamed(context, '/home');
+      await _handlePostAuthNavigation(context);
     } catch (e) {
       debugPrint("AuthProvider: SIGNUP ERROR -> $e");
 
@@ -108,6 +112,22 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       debugPrint("AuthProvider: LOGOUT finished");
+    }
+  }
+
+  Future<void> _handlePostAuthNavigation(BuildContext context) async {
+    final userId = await UserSession.getUserId();
+
+    if (userId == null) {
+      Navigator.pushReplacementNamed(context, '/home');
+      return;
+    }
+
+    try {
+      await _preferencesService.getUserPreferences(userId);
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      Navigator.pushReplacementNamed(context, '/preferencesSetup');
     }
   }
 }

@@ -141,8 +141,9 @@ class _UserCommunityState extends State<UserCommunity>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: colors.surface,
+      backgroundColor: isDark ? colors.surface : Colors.white,
       body: SafeArea(
         child: Column(
           children: [

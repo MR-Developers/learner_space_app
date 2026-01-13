@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:learner_space_app/Screens/Learner/UserPreferences.dart';
 import 'package:provider/provider.dart';
 
 import 'Screens/Learner/CourseDetails.dart';
@@ -144,6 +145,7 @@ class MyApp extends StatelessWidget {
         "/settings/privacy-security": (_) => const PrivacyAndSecurityPage(),
         "/search": (_) => const SearchPage(),
         "/editProfile": (_) => const EditProfileScreen(),
+        "/preferencesSetup": (_) => const PreferencesSetupScreen(),
       },
     );
   }

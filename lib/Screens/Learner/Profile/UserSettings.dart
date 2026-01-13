@@ -35,9 +35,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: isDark ? colors.surface : Colors.white,
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
