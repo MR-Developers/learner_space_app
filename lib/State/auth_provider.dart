@@ -68,7 +68,7 @@ class AuthProvider extends ChangeNotifier {
         const SnackBar(content: Text('Account Created Successfully')),
       );
 
-      await _handlePostAuthNavigation(context);
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     } catch (e) {
       debugPrint("AuthProvider: SIGNUP ERROR -> $e");
 

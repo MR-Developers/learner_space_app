@@ -45,32 +45,7 @@ class AuthRepository {
   // SIGNUP
 
   Future<void> signup(UserSignUpFormValues form) async {
-    final data = await _authService.signup(form);
-
-    final accessToken = data['accessToken'];
-    final refreshToken = data['refreshToken'];
-
-    if (accessToken == null || refreshToken == null) {
-      throw Exception("Missing tokens from signup response");
-    }
-
-    final decoded = JwtDecoder.decode(accessToken);
-    final uid = decoded["uid"].toString();
-    final emailFromToken = decoded["email"];
-    final role = decoded["role"];
-
-    await _persistAuthData(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      uid: uid,
-      email: emailFromToken,
-      role: role,
-    );
-
-    // 🔔 CREATE FCM ENTRY (FIRST TIME)
-    await _registerFcmOnSignup(uid);
-
-    print("✅ Signup completed with FCM registered");
+    await _authService.signup(form);
   }
 
   // LOGOUT

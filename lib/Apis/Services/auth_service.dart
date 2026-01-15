@@ -31,7 +31,7 @@ class AuthService {
 
       return response.data;
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "SignUp Failed";
+      final message = e.response?.data?['error'] ?? "SignUp Failed";
       throw Exception(message);
     }
   }

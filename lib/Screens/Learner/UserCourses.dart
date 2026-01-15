@@ -382,7 +382,7 @@ class _UserCoursesState extends State<UserCourses> {
               ? Border.all(color: colors.outline.withOpacity(0.3))
               : Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(26),
-          color: theme.colorScheme.surface,
+          color: isDark ? theme.colorScheme.surface : Colors.white,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
